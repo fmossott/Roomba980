@@ -3,6 +3,13 @@ body {
 }
 
 .data {
-  font-size: 20px;
-  font-weight: 10
+  font-weight: bold;
+  text-align: left;
+}
+
+.info {
+  font-size: small;
+  border-spacing: 1px;
+  border-collapse: separate;
+  opacity: 0.6;
 }

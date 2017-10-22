@@ -16,11 +16,92 @@ var textLayer;
 var lastPhase = '';
 var mapping = true;
 
-function startApp () {
-  pathLayer = document.getElementById('path_layer');
-  robotBodyLayer = document.getElementById('robot_body_layer');
-  textLayer = document.getElementById('text_layer');
+var zoom;
 
+var minX;
+var minY;
+var maxX;
+var maxY;
+
+var lastX;
+var lastY;
+var lastTheta;
+
+var steps=[];
+var phases=[];
+
+function updateMinMax(x,y, autoScale) {
+  var changed=false;
+
+  if (!minX || x<minX) {
+    minX=x;
+    changed=true;
+  }
+
+  if (!minY || y<minY) {
+    minY=y;
+    changed=true;
+  }
+
+  if (!maxX || x>maxX) {
+    maxX=x;
+    changed=true;
+  }
+
+  if (!maxY || y>maxY) {
+    maxY=y;
+    changed=true;
+  }
+  
+  if (autoScale && changed) scale();
+}
+
+function scale(forcePan) {  
+  var changed = false;
+  // autozoom
+  if (zoom>Math.min( sizeX/(maxX-minX), sizeY/(maxY-minY) )) {
+    zoom=Math.min( sizeX/(maxX-minX+200), sizeY/(maxY-minY+200));
+    $('#zoom').val(zoom);
+    changed = true;
+  }
+  
+  if (forcePan || changed || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX/zoom || maxY > -yOffset + sizeY/zoom) {
+    xOffset = (-maxX - minX + sizeX/zoom) / 2;
+    yOffset = (-maxY - minY + sizeY/zoom) / 2;
+    $('#offsetx').val(xOffset);
+    $('#offsety').val(yOffset);
+    changed=true;
+  }
+  
+  if (changed) redraw();
+  
+  return changed;
+}
+
+function center() {
+  scale(true);
+}
+
+function fit() {
+  zoom=1;
+  $('#zoom').val(zoom);
+  scale(true);
+}
+
+$(window).resize(resizeCanvas);
+
+function resizeCanvas() {
+//  sizeX=window.innerWidth;
+  sizeX=$("#map").width();
+  sizeY=window.innerHeight-$("#menu").height()-20;
+
+  $('#sizew').val(sizeX);
+  $('#sizeh').val(sizeY);
+
+  fit();
+}
+
+function scaleAndTranslateCanvases() {
   pathLayer.width = sizeX;
   pathLayer.height = sizeY;
 
@@ -30,6 +111,22 @@ function startApp () {
   textLayer.width = sizeX;
   textLayer.height = sizeY;
 
+  pathLayerContext.scale(zoom, zoom);
+  robotBodyLayerContext.scale(zoom, zoom);
+  textLayerContext.scale(zoom, zoom);
+
+  pathLayerContext.translate(-xOffset, yOffset);
+  robotBodyLayerContext.translate(-xOffset, yOffset);
+  textLayerContext.translate(-xOffset, yOffset);
+  
+  pathLayerContext.beginPath();
+}
+
+function startApp () {
+  pathLayer = document.getElementById('path_layer');
+  robotBodyLayer = document.getElementById('robot_body_layer');
+  textLayer = document.getElementById('text_layer');
+
   $('#sizew').val(sizeX);
   $('#sizeh').val(sizeY);
 
@@ -37,7 +134,6 @@ function startApp () {
   $('#offsety').val(yOffset);
 
   $('#updateevery').val(updateEvery);
-  startMissionLoop();
 
   pathLayerContext = pathLayer.getContext('2d');
   robotBodyLayerContext = robotBodyLayer.getContext('2d');
@@ -47,6 +143,17 @@ function startApp () {
   pathLayerContext.lineWidth = 1;
   pathLayerContext.strokeStyle = '#000000';
   pathLayerContext.lineCap = 'round';
+  
+  if (steps.length>0) {
+    steps.forEach(function(item, index) {
+      updateMinMax(item.x, item.y);
+    });
+  } else {
+    minX=0; maxX=0; minY=0; maxY=0;
+  }
+  resizeCanvas();
+
+  startMissionLoop();
 }
 
 function startMissionLoop () {
@@ -95,6 +202,21 @@ function messageHandler (msg) {
     msg.ok.cycle,
     msg.ok.phase
   );
+  $('#steps').html(steps.length);
+  $('#mapStatus').html('');
+}
+
+function drawPhase(x,y,phase) {
+  x=sizeX/zoom-x;
+  textLayerContext.font = 'normal '+(12/zoom)+'pt Calibri';
+  textLayerContext.fillStyle = 'blue';
+  textLayerContext.fillText(phase, x+calcRadio(), y);
+}
+
+function drawSegment(x, y) {
+  x=sizeX/zoom-x;
+  pathLayerContext.lineTo(x, y);
+  pathLayerContext.stroke();
 }
 
 function drawStep (x, y, theta, cycle, phase) {
@@ -104,58 +226,88 @@ function drawStep (x, y, theta, cycle, phase) {
     y = 0;
   }
 
-  x = parseInt(x, 10) + xOffset;
-  y = parseInt(y, 10) + yOffset;
-  var oldX = x;
+  x = parseInt(x, 10);
+  y = parseInt(y, 10);
 
-  // rotate
-  x = y;
-  y = pathLayer.height - oldX;
-  x = pathLayer.width - x;
+  if (x!=lastX || y!=lastY || theta!=lastTheta) {
+    drawRobotBody(x, y, lastX, lastY, theta);
+    lastTheta=theta;
+  }
 
-  drawRobotBody(x, y, theta);
+  if (x!=lastX || y!=lastY) {
+    steps.push({x,y});
+    drawSegment(x,y);
+    lastX=x;
+    lastY=y;
+  }
 
   // draw changes in status with text.
   if (phase !== lastPhase) {
-    textLayerContext.font = 'normal 12pt Calibri';
-    textLayerContext.fillStyle = 'blue';
-    textLayerContext.fillText(phase, x, y);
+    phases.push({x,y,phase});
+    drawPhase(x,y,phase);
     lastPhase = phase;
-  } else {
-    pathLayerContext.lineTo(x, y);
-    pathLayerContext.stroke();
-  }
+  } 
+
+  updateMinMax(x,y,true);
+  
 }
 
-function drawRobotBody (x, y, theta) {
-  theta = parseInt(theta, 10);
+function calcRadio() {
   var radio = 15;
-  robotBodyLayerContext.clearRect(0, 0, robotBodyLayer.width, robotBodyLayer.height);
+  if (radio*zoom < 5) radio=5/zoom;
+  if (radio*zoom > 30) radio=30/zoom;
+  
+  return radio;
+}
+
+function drawRobotBody (x, y, prevX, prevY, theta) {
+  x=sizeX/zoom-x;
+  prevX=sizeX/zoom-prevX;
+  
+  theta = parseInt(theta, 10);
+  var radio = calcRadio();
+  
+  var lineWidth = radio/5;
+  
+  robotBodyLayerContext.clearRect(prevX-radio-5, prevY-radio-5, 2*radio+10, 2*+radio+10);
   robotBodyLayerContext.beginPath();
   robotBodyLayerContext.arc(x, y, radio, 0, 2 * Math.PI, false);
   robotBodyLayerContext.fillStyle = 'green';
   robotBodyLayerContext.fill();
-  robotBodyLayerContext.lineWidth = 3;
+  robotBodyLayerContext.lineWidth = lineWidth;
   robotBodyLayerContext.strokeStyle = '#003300';
   robotBodyLayerContext.stroke();
 
-  var outerX = x + radio * Math.cos((theta - 90) * (Math.PI / 180));
-  var outerY = y + radio * Math.sin((theta - 90) * (Math.PI / 180));
+  var outerX = x - radio * Math.cos((theta) * (Math.PI / 180));
+  var outerY = y + radio * Math.sin((theta) * (Math.PI / 180));
 
   robotBodyLayerContext.beginPath();
   robotBodyLayerContext.moveTo(x, y);
   robotBodyLayerContext.lineTo(outerX, outerY);
   robotBodyLayerContext.strokeStyle = '#003300';
-  robotBodyLayerContext.lineWidth = 3;
+  robotBodyLayerContext.lineWidth = lineWidth;
   robotBodyLayerContext.stroke();
+}
+
+function redraw() {
+    scaleAndTranslateCanvases();
+    
+    steps.forEach(function(item, index) {
+      drawSegment(item.x, item.y);
+    });
+
+    phases.forEach(function(item, index) {
+      drawPhase(item.x, item.y, item.phase);
+    });
+    
+    drawRobotBody(lastX, lastY, lastX, lastY, lastTheta);
 }
 
 function clearMap () {
   lastPhase = '';
-  pathLayerContext.clearRect(0, 0, pathLayer.width, pathLayer.height);
-  robotBodyLayerContext.clearRect(0, 0, robotBodyLayer.width, robotBodyLayer.height);
-  textLayerContext.clearRect(0, 0, textLayer.width, textLayer.height);
-  pathLayerContext.beginPath();
+  phases=[];
+  steps=[];
+  fit();
 }
 
 function toggleMapping () {
@@ -165,6 +317,16 @@ function toggleMapping () {
 
 function getValue (name, actual) {
   var newValue = parseInt($(name).val(), 10);
+  if (isNaN(newValue)) {
+    alert('Invalid ' + name);
+    $(name).val(actual);
+    return actual;
+  }
+  return newValue;
+}
+
+function getValueFloat (name, actual) {
+  var newValue = parseFloat($(name).val());
   if (isNaN(newValue)) {
     alert('Invalid ' + name);
     $(name).val(actual);
@@ -184,68 +346,56 @@ function downloadCanvas () {
   document.getElementById('download').download = 'current_map.png';
 }
 
-function shiftCanvas (ctx, w, h, dx, dy) {
-  var imageData = ctx.getImageData(0, 0, w, h);
-  ctx.clearRect(0, 0, w, h);
-  ctx.putImageData(imageData, dx, dy);
+function downloadSteps () {
+  var json = JSON.stringify(steps);
+  var blob = new Blob([json], {type: "application/json"});
+  var url  = URL.createObjectURL(blob);
+  document.getElementById('downloadData').href = url;
+  document.getElementById('downloadData').download = 'current_data.json';
 }
 
 function saveValues () {
   var values = {
-    'offsetX': getValue('#offsetx', xOffset),
-    'offsetY': getValue('#offsety', yOffset),
-    'sizeW': getValue('#sizew', pathLayer.width),
-    'sizeH': getValue('#sizeh', pathLayer.height),
-    'pointIntervalMs': updateEvery
+    'pointIntervalMs': updateEvery,
   };
   $.post('/map/values', values, function (data) {
   });
 }
 
-$('.metrics').on('change', function () {
+/* $('.metrics').on('change', function () {
+  var toRedraw=false;
+  
+  var z = getValueFloat('#zoom', zoom);
+  if (zoom != z) {
+    zoom=z
+    toRedraw=true;
+  }
+  
   var w = getValue('#sizew', pathLayer.width);
-  var h = getValue('#sizeh', pathLayer.height);
-  if (pathLayer.width !== w) {
-    pathLayerContext.beginPath();
-    shiftCanvas(textLayerContext, w, h, (w - pathLayer.width), 0);
-    shiftCanvas(pathLayerContext, w, h, (w - pathLayer.width), 0);
-    var imgDataW = pathLayerContext.getImageData(0, 0, pathLayer.width, pathLayer.height);
-    var imgDataT1 = textLayerContext.getImageData(0, 0, textLayer.width, textLayer.height);
-    pathLayer.width = w;
-    robotBodyLayer.width = w;
-    textLayer.width = w;
-    pathLayerContext.putImageData(imgDataW, 0, 0);
-    textLayerContext.putImageData(imgDataT1, 0, 0);
+  if (sizeX != w) {
+    sizeX=w;
+    toRedraw=true;
   }
 
-  if (pathLayer.height !== h) {
-    pathLayerContext.beginPath();
-    shiftCanvas(textLayerContext, w, h, 0, (h - pathLayer.height));
-    shiftCanvas(pathLayerContext, w, h, 0, (h - pathLayer.height));
-    var imgDataH = pathLayerContext.getImageData(0, 0, pathLayer.width, pathLayer.height);
-    var imgDataT2 = textLayerContext.getImageData(0, 0, textLayer.width, textLayer.height);
-    pathLayer.height = h;
-    robotBodyLayer.height = h;
-    textLayer.height = h;
-    pathLayerContext.putImageData(imgDataH, 0, 0);
-    textLayerContext.putImageData(imgDataT2, 0, 0);
+  var h = getValue('#sizeh', pathLayer.height);
+  if (sizeY != h) {
+    sizeY=h;
+    toRedraw=true;
   }
 
   var newYOffset = getValue('#offsety', yOffset);
   if (newYOffset !== yOffset) {
-    pathLayerContext.beginPath();
-    shiftCanvas(pathLayerContext, w, h, (yOffset - newYOffset), 0);
-    shiftCanvas(textLayerContext, w, h, (yOffset - newYOffset), 0);
     yOffset = newYOffset;
+    toRedraw=true;
   }
   var newXOffset = getValue('#offsetx', xOffset);
   if (newXOffset !== xOffset) {
-    pathLayerContext.beginPath();
-    shiftCanvas(pathLayerContext, w, h, 0, (xOffset - newXOffset));
-    shiftCanvas(textLayerContext, w, h, 0, (xOffset - newXOffset));
     xOffset = newXOffset;
+    toRedraw=true;
   }
-});
+  
+  if (toRedraw) fit();  
+}); */
 
 $('.action').on('click', function () {
   var me = $(this);

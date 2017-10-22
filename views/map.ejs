@@ -8,48 +8,58 @@ var sizeY = <%=mapvalues.sizeH%>;
 var updateEvery = <%=mapvalues.pointIntervalMs%>;
 
 </script>
-<div>
-  <button type="button" class='btn btn-success action' data-action='/api/local/action/start'>Start</button>
-  <button type="button" class='btn btn-success action' data-action='/api/local/action/pause'>Pause</button>
-  <button type="button" class='btn btn-success action' data-action='/api/local/action/resume'>Resume</button>
-  <button type="button" class='btn btn-success action' data-action='/api/local/action/dock'>Dock</button>
-  <button type="button" class='btn btn-success action' data-action='/api/local/action/stop'>Stop</button>
-  <button type="button" class='btn btn-info action' data-action='/api/local/info/sys'>Test Sys</button>
-  <a type="button" class='btn btn-warning' id='download' onclick='downloadCanvas();'>Download Image</a>
-  <button type="button" class='btn btn-danger' onclick='clearMap();'>Clear map</button>
-  <button type="button" class='btn btn-danger' onclick='toggleMapping();'>Start/Stop mapping</button> <span class='' id='mapStatus'></span>
+<div id="menu">
+  <div>
+    <button type="button" class='btn btn-success action' data-action='/api/local/action/start'>Start</button>
+    <button type="button" class='btn btn-success action' data-action='/api/local/action/pause'>Pause</button>
+    <button type="button" class='btn btn-success action' data-action='/api/local/action/resume'>Resume</button>
+    <button type="button" class='btn btn-success action' data-action='/api/local/action/dock'>Dock</button>
+    <button type="button" class='btn btn-success action' data-action='/api/local/action/stop'>Stop</button>
+    <button type="button" class='btn btn-info action' data-action='/api/local/info/sys'>Test Sys</button>
+    <a type="button" class='btn btn-warning' id='download' onclick='downloadCanvas();'>Download Image</a>
+    <a type="button" class='btn btn-warning' id='downloadData' onclick='downloadSteps();'>Download Data</a>
+    <button type="button" class='btn btn-danger' onclick='clearMap();'>Clear map</button>
+    <button type="button" class='btn btn-danger' onclick='toggleMapping();'>Start/Stop mapping</button> 
+  </div>
   <div>
     Update every: <input type='text' id='updateevery' size='5' value=''/>ms.
-    Canvas size: w:<input type='text' class='metrics' id='sizew' size='5' value=''/> h:<input class='metrics' type='text' id='sizeh' size='5' value=''/>
-    Offsets: x:<input type='text' class='metrics' id='offsetx' size='5' value=''/> y:<input class='metrics' type='text' id='offsety' size='5' value=''/> <button type="button" onclick='saveValues();'>Save values</button>
+    Canvas size: w:<input type='text' class='metrics' id='sizew' size='5' value='' disabled/> h:<input class='metrics' type='text' id='sizeh' size='5' value='' disabled/>
+    Zoom: <input type='text' class='metrics' id='zoom' size='5' value='' disabled/>
+    Offsets: x:<input type='text' class='metrics' id='offsetx' size='5' value='' disabled/> y:<input class='metrics' type='text' id='offsety' size='5' value='' disabled/>
+    <button type="button" onclick='center();'>Center</button>
+    <button type="button" onclick='fit();'>Auto Fit</button>
   </div>
 
-  <div>Command response: <div id='apiresponse'>ok</div></div>
-
-  <div style="position: relative;">
-    <canvas id="path_layer"  style="position: absolute; left: 0; top: 0; z-index: 0; border:1px solid #d3d3d3;"></canvas>
-    <canvas id="robot_body_layer" style="position: absolute; left: 0; top: 0; z-index: 1; border:1px solid #d3d3d3;"></canvas>
-    <canvas id="text_layer" style="position: absolute; left: 0; top: 0; z-index: 2; border:1px solid #d3d3d3;"></canvas>
-  </div>
+  <div>Command response: <span id='apiresponse'>ok</span></div>
+  <div>Status: <span class='' id='mapStatus' style='white-space:nowrap;'></span></div>
+</div>
+<div id="map" style="position: relative; width=100%;">
+  <canvas id="path_layer"  style="position: absolute; left: 0; top: 0; z-index: 0; border:1px solid #d3d3d3;"></canvas>
+  <canvas id="robot_body_layer" style="position: absolute; left: 0; top: 0; z-index: 1; border:1px solid #d3d3d3;"></canvas>
+  <canvas id="text_layer" style="position: absolute; left: 0; top: 0; z-index: 2; border:1px solid #d3d3d3;"></canvas>
 </div>
 
-<div style='float:right'>
-  Last point: <span class='data' id='last'></span><br/>
-  Mission Time: <span class='data' id='mission'></span>min<br/>
-  Mission: <span class='data' id='nMssn'></span><br/>
-  Bin present: <span class='data' id='bin'></span><br/>
-  Cycle: <span class='data' id='cycle'></span><br/>
-  Phase: <span class='data' id='phase'></span><br/>
-  Flags: <span class='data' id='flags'></span><br/>
-  Battery: <span class='data' id='batPct'></span>%<br/>
-  Error: <span class='data' id='error'></span><br/>
-  Sqft: <span class='data' id='sqft'></span><br/>
-  expireM: <span class='data' id='expireM'></span>min<br/>
-  rechrgM: <span class='data' id='rechrgM'></span>min<br/>
-  notReady: <span class='data' id='notReady'></span><br/>
-  theta: <span class='data' id='theta'></span><br/>
-  x: <span class='data' id='x'></span><br/>
-  y: <span class='data' id='y'></span><br/>
+<div style='float:right; text-align:right'>
+  <table class='info' cellspacing="1">
+    <tr><td>Last point:</td><td class='data'><span id='last'></span></td></tr>
+    <tr><td>Mission Time:</td><td class='data'><span id='mission'></span></td></tr>
+    <tr><td>Mission:</td><td class='data'><span id='nMssn'></span></td></tr>
+    <tr><td>Bin present:</td><td class='data'><span id='bin'></span></td></tr>
+    <tr><td>Cycle:</td><td class='data'><span id='cycle'></span></td></tr>
+    <tr><td>Phase:</td><td class='data'><span id='phase'></span></td></tr>
+    <tr><td>Flags:</td><td class='data'><span id='flags'></span></td></tr>
+    <tr><td>Battery:</td><td class='data'><span id='batPct'></span></td></tr>
+    <tr><td>Error:</td><td class='data'><span id='error'></span></td></tr>
+    <tr><td>Sqft:</td><td class='data'><span id='sqft'></span></td></tr>
+    <tr><td>expireM:</td><td class='data'><span id='expireM'></span></td></tr>
+    <tr><td>rechrgM:</td><td class='data'><span id='rechrgM'></span></td></tr>
+    <tr><td>notReady:</td><td class='data'><span id='notReady'></span></td></tr>
+    <tr><td>theta:</td><td class='data'><span id='theta'></span></td></tr>
+    <tr><td>x:</td><td class='data'><span id='x'></span></td></tr>
+    <tr><td>y:</td><td class='data'><span id='y'></span></td></tr>
+    <tr><td>&nbsp;</td><td></td></tr>
+    <tr><td>steps:</td><td class='data'><span id='steps'></span></td></tr>
+  </table>
 </div>
 
 <script src="/js/map.js"></script>
