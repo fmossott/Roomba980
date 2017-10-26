@@ -10,7 +10,7 @@ router.get('/', function (req, res) {
     if (err) {
       console.log(err);
     } else {
-      res.json(files);
+      res.json(files.filter(function(file) { return file.endsWith('.log'); }));
     }
   });
 });
