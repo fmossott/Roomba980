@@ -10,12 +10,12 @@ var updateEvery = <%=mapvalues.pointIntervalMs%>;
 </script>
 <div id="menu">
   <div>
-    <button type="button" class='btn btn-success action' data-action='/api/local/action/start'>Start</button>
-    <button type="button" class='btn btn-success action' data-action='/api/local/action/pause'>Pause</button>
-    <button type="button" class='btn btn-success action' data-action='/api/local/action/resume'>Resume</button>
-    <button type="button" class='btn btn-success action' data-action='/api/local/action/dock'>Dock</button>
-    <button type="button" class='btn btn-success action' data-action='/api/local/action/stop'>Stop</button>
-    <button type="button" class='btn btn-info action' data-action='/api/local/info/sys'>Test Sys</button>
+    <button type="button" class='btn btn-success action' data-action='api/local/action/start'>Start</button>
+    <button type="button" class='btn btn-success action' data-action='api/local/action/pause'>Pause</button>
+    <button type="button" class='btn btn-success action' data-action='api/local/action/resume'>Resume</button>
+    <button type="button" class='btn btn-success action' data-action='api/local/action/dock'>Dock</button>
+    <button type="button" class='btn btn-success action' data-action='api/local/action/stop'>Stop</button>
+    <button type="button" class='btn btn-info action' data-action='api/local/info/sys'>Test Sys</button>
     <a type="button" class='btn btn-warning' id='download' onclick='downloadCanvas();'>Download Image</a>
     <a type="button" class='btn btn-warning' id='downloadData' onclick='downloadSteps();'>Download Data</a>
     <button type="button" class='btn btn-danger' onclick='clearMap();'>Clear map</button>
@@ -62,6 +62,6 @@ var updateEvery = <%=mapvalues.pointIntervalMs%>;
   </table>
 </div>
 
-<script src="/js/map.js"></script>
+<script src="<%=rootPath%>/js/map.js"></script>
 
 <% include footer.ejs %>

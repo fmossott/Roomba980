@@ -4,6 +4,7 @@ var express = require('express');
 var router = express.Router();
 var config = require('config');
 var dorita980 = require('dorita980');
+var fs = require('fs');
 
 var blid = process.env.BLID || config.blid;
 var password = process.env.PASSWORD || config.password;
@@ -14,6 +15,8 @@ var enableLocal = process.env.ENABLE_LOCAL || config.enableLocal || 'yes';
 var enableCloud = process.env.ENABLE_CLOUD || config.enableCloud || 'yes';
 var keepAlive = process.env.KEEP_ALIVE || config.keepAlive || 'yes';
 
+var missionsPath = './missions/';
+
 // Temporal:
 if (firmwareVersion === 2) enableCloud = 'no';
 
@@ -23,12 +26,36 @@ if (!blid || !password) {
 
 var myRobot = {};
 
+function yyyymmdd(date) {
+  var mm = date.getMonth() + 1; // getMonth() is zero-based
+  var dd = date.getDate();
+
+  return [date.getFullYear(),
+          (mm>9 ? '' : '0') + mm,
+          (dd>9 ? '' : '0') + dd
+         ].join('');
+};
+
 var handleIP = (robotIP || enableLocal === 'no') ? function (cb) { cb(null, robotIP); } : dorita980.getRobotIP;
 handleIP(function (e, ip) {
   if (e) throw e;
   knownIP = ip;
   if (enableLocal === 'yes') {
-    if (firmwareVersion === 1 || (keepAlive === 'yes')) myRobot.local = new dorita980.Local(blid, password, ip, firmwareVersion);
+    if (firmwareVersion === 1 || (keepAlive === 'yes')) {
+      myRobot.local = new dorita980.Local(blid, password, ip, firmwareVersion);
+      myRobot.local.on('update', function (msg) {
+        if (msg && msg.state && msg.state.reported && msg.state.reported.pose) {
+          var filename=new Date().toISOString()
+          fs.appendFile(missionsPath+yyyymmdd(new Date())+'.log', JSON.stringify(msg.state.reported)+'\n', function (err) {
+            if (err) throw err;
+          });
+        } else if (!msg.state.reported) {
+            console.log(msg);
+            console.log(msg.state);
+            console.log(msg.reported);
+        }
+      });
+    }
   }
   if (enableCloud === 'yes') myRobot.cloud = new dorita980.Cloud(blid, password, firmwareVersion);
 });

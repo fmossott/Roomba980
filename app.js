@@ -10,6 +10,9 @@ var config = require('config');
 var helloRoute = require('./routes/index');
 var apiRoute = require('./routes/api');
 var mapRoute = require('./routes/map');
+var missionsRoute = require('./routes/missions');
+
+var rootPath = '/roomba';
 
 var app = express();
 
@@ -50,12 +53,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(rootPath, express.static(path.join(__dirname, 'public')));
 app.use(authHandler);
 
-app.use('/', helloRoute);
-app.use('/api', apiRoute);
-app.use('/map', mapRoute);
+app.use(rootPath+'/', helloRoute);
+app.use(rootPath+'/api', apiRoute);
+app.use(rootPath+'/map', mapRoute);
+app.use(rootPath+'/missions', missionsRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -69,7 +73,7 @@ app.use(function (req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function (err, req, res) {
+  app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.send({
       message: err.message,
@@ -80,7 +84,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function (err, req, res) {
+app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.send({
     message: err.message,

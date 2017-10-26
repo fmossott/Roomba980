@@ -99,6 +99,7 @@ function resizeCanvas() {
   $('#sizeh').val(sizeY);
 
   fit();
+  console.log(new Date().toISOString()+" resize complete");
 }
 
 function scaleAndTranslateCanvases() {
@@ -120,6 +121,43 @@ function scaleAndTranslateCanvases() {
   textLayerContext.translate(-xOffset, yOffset);
   
   pathLayerContext.beginPath();
+}
+
+function yyyymmdd(date) {
+  var mm = date.getMonth() + 1; // getMonth() is zero-based
+  var dd = date.getDate();
+
+  return [date.getFullYear(),
+          (mm>9 ? '' : '0') + mm,
+          (dd>9 ? '' : '0') + dd
+         ].join('');
+};
+
+function loadCurrent() {
+  return new Promise(function(resolve, reject) {
+    console.log(new Date().toISOString()+" loading data");
+    $.get('missions/'+yyyymmdd(new Date())+'.log', function (data) {
+        console.log(new Date().toISOString()+" processing data");
+        var lines = data.split('\n');
+        for(var i = 0;i < lines.length;i++){
+          var l=lines[i];
+          try {
+            if (l.charAt(0) === '{') {
+              var msg=JSON.parse(l);
+              if (msg.pose) {
+                updateMinMax(msg.pose.point.x, msg.pose.point.y);
+                steps.push(msg.pose);
+              }
+            }
+          } catch(e) {
+            console.log(l);
+            console.log(e);
+          }
+        }
+        console.log(new Date().toISOString()+" processing complete");
+        resolve();
+    });
+  });
 }
 
 function startApp () {
@@ -144,23 +182,21 @@ function startApp () {
   pathLayerContext.strokeStyle = '#000000';
   pathLayerContext.lineCap = 'round';
   
-  if (steps.length>0) {
-    steps.forEach(function(item, index) {
-      updateMinMax(item.x, item.y);
-    });
-  } else {
-    minX=0; maxX=0; minY=0; maxY=0;
-  }
   resizeCanvas();
-
-  startMissionLoop();
+  
+  loadCurrent().then(
+    startMissionLoop
+  ).then(
+    fit
+  );
 }
 
 function startMissionLoop () {
   if (mapping) {
     $('#mapStatus').html('getting point...');
-    $.get('/api/local/info/mission', function (data) {
+    $.get('api/local/info/mission', function (data) {
       messageHandler(data);
+    }).always(function () {
       setTimeout(startMissionLoop, updateEvery);
     });
   } else {
@@ -196,9 +232,7 @@ function messageHandler (msg) {
   $('#y').html(msg.ok.pos.point.y);
 
   drawStep(
-    msg.ok.pos.point.x,
-    msg.ok.pos.point.y,
-    msg.ok.pos.theta,
+    msg.ok.pos,
     msg.ok.cycle,
     msg.ok.phase
   );
@@ -219,15 +253,17 @@ function drawSegment(x, y) {
   pathLayerContext.stroke();
 }
 
-function drawStep (x, y, theta, cycle, phase) {
+function drawStep (pose, cycle, phase) {
+  x = pose.point.x;
+  y = pose.point.y;
+  theta = pose.theta;
+
   if (phase === 'charge') {
     // hack (getMission() dont send x,y if phase is diferent as run)
     x = 0;
     y = 0;
   }
 
-  x = parseInt(x, 10);
-  y = parseInt(y, 10);
 
   if (x!=lastX || y!=lastY || theta!=lastTheta) {
     drawRobotBody(x, y, lastX, lastY, theta);
@@ -235,7 +271,7 @@ function drawStep (x, y, theta, cycle, phase) {
   }
 
   if (x!=lastX || y!=lastY) {
-    steps.push({x,y});
+    steps.push(pose);
     drawSegment(x,y);
     lastX=x;
     lastY=y;
@@ -293,7 +329,7 @@ function redraw() {
     scaleAndTranslateCanvases();
     
     steps.forEach(function(item, index) {
-      drawSegment(item.x, item.y);
+      drawSegment(item.point.x, item.point.y);
     });
 
     phases.forEach(function(item, index) {
