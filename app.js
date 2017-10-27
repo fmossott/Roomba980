@@ -12,7 +12,7 @@ var apiRoute = require('./routes/api');
 var mapRoute = require('./routes/map');
 var missionsRoute = require('./routes/missions');
 
-var rootPath = '/roomba';
+var rootPath = config.rootPath || '';
 
 var app = express();
 
