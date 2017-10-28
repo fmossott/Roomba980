@@ -37,7 +37,7 @@ if (sslKeyFile && sslCertFile) {
 /**
  * Listen on provided port, on all network interfaces.
  */
-
+require('express-ws')(app, server);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);

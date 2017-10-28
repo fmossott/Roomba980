@@ -19,7 +19,9 @@ var updateEvery = <%=mapvalues.pointIntervalMs%>;
     <a type="button" class='btn btn-warning' id='download' onclick='downloadCanvas();'>Download Image</a>
     <a type="button" class='btn btn-warning' id='downloadData' onclick='downloadSteps();'>Download Data</a>
     <button type="button" class='btn btn-danger' onclick='clearMap();'>Clear map</button>
-    <button type="button" class='btn btn-danger' onclick='toggleMapping();'>Start/Stop mapping</button> 
+    <button type="button" class='btn btn-danger' onclick='replay();'>Replay</button> 
+    <button type="button" class='btn btn-danger' id='start' style='display:none' onclick='toggleMapping(true);'>Start mapping</button> 
+    <button type="button" class='btn btn-danger' id='stop' onclick='toggleMapping(false);'>Stop mapping</button> 
   </div>
   <div>
     Update every: <input type='text' id='updateevery' size='5' value=''/>ms.
@@ -45,6 +47,7 @@ var updateEvery = <%=mapvalues.pointIntervalMs%>;
     <tr><td>Mission Time:</td><td class='data'><span id='mission'></span></td></tr>
     <tr><td>Mission:</td><td class='data'><span id='nMssn'></span></td></tr>
     <tr><td>Bin present:</td><td class='data'><span id='bin'></span></td></tr>
+    <tr><td>Bin full:</td><td class='data'><span id='full'></span></td></tr>
     <tr><td>Cycle:</td><td class='data'><span id='cycle'></span></td></tr>
     <tr><td>Phase:</td><td class='data'><span id='phase'></span></td></tr>
     <tr><td>Flags:</td><td class='data'><span id='flags'></span></td></tr>

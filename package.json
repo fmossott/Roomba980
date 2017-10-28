@@ -15,6 +15,7 @@
     "url": "git+https://github.com/koalazak/rest980.git"
   },
   "dependencies": {
+    "basic-auth": "1.1.0",
     "body-parser": "^1.16.0",
     "config": "^1.21.0",
     "cookie-parser": "^1.4.3",
@@ -22,9 +23,10 @@
     "dorita980": "^3.0.8",
     "ejs": "^2.5.2",
     "express": "^4.14.0",
+    "express-ws": "^3.0.0",
     "jsonfile": "^3.0.0",
     "morgan": "^1.7.0",
-    "basic-auth": "1.1.0"
+    "ws": "^3.2.0"
   },
   "devDependencies": {
     "semistandard": "^9.1.0",

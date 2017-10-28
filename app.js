@@ -7,14 +7,26 @@ var bodyParser = require('body-parser');
 var basicAuth = require('basic-auth');
 var config = require('config');
 
+var robot = require('./lib/robot');
+
 var helloRoute = require('./routes/index');
-var apiRoute = require('./routes/api');
+var apiRoute = require('./routes/api')(robot);
 var mapRoute = require('./routes/map');
-var missionsRoute = require('./routes/missions');
+var missionsRoute = require('./routes/missions')(robot);
 
 var rootPath = config.rootPath || '';
 
 var app = express();
+
+Date.prototype.yyyymmdd = function() {
+  var mm = this.getMonth() + 1; // getMonth() is zero-based
+  var dd = this.getDate();
+
+  return [this.getFullYear(),
+          (mm>9 ? '' : '0') + mm,
+          (dd>9 ? '' : '0') + dd
+         ].join('');
+};
 
 // Authentication handler
 var basicAuthUser = process.env.BASIC_AUTH_USER || config.basicAuthUser;

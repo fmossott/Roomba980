@@ -30,6 +30,11 @@ var lastTheta;
 var steps=[];
 var phases=[];
 
+var replaying=false;
+var replayStep=0;
+
+var webSocket;
+
 function updateMinMax(x,y, autoScale) {
   var changed=false;
 
@@ -59,7 +64,7 @@ function updateMinMax(x,y, autoScale) {
 function scale(forcePan) {  
   var changed = false;
   // autozoom
-  if (zoom>Math.min( sizeX/(maxX-minX), sizeY/(maxY-minY) )) {
+  if (zoom>Math.min( sizeX/(maxX-minX), sizeY/(maxY-minY) ) || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX/zoom || maxY > -yOffset + sizeY/zoom) {
     zoom=Math.min( sizeX/(maxX-minX+200), sizeY/(maxY-minY+200));
     $('#zoom').val(zoom);
     changed = true;
@@ -99,7 +104,6 @@ function resizeCanvas() {
   $('#sizeh').val(sizeY);
 
   fit();
-  console.log(new Date().toISOString()+" resize complete");
 }
 
 function scaleAndTranslateCanvases() {
@@ -123,20 +127,10 @@ function scaleAndTranslateCanvases() {
   pathLayerContext.beginPath();
 }
 
-function yyyymmdd(date) {
-  var mm = date.getMonth() + 1; // getMonth() is zero-based
-  var dd = date.getDate();
-
-  return [date.getFullYear(),
-          (mm>9 ? '' : '0') + mm,
-          (dd>9 ? '' : '0') + dd
-         ].join('');
-};
-
 function loadCurrent() {
   return new Promise(function(resolve, reject) {
     console.log(new Date().toISOString()+" loading data");
-    $.get('missions/'+yyyymmdd(new Date())+'.log', function (data) {
+    $.get('missions/current', function (data) {
         console.log(new Date().toISOString()+" processing data");
         var lines = data.split('\n');
         for(var i = 0;i < lines.length;i++){
@@ -184,11 +178,16 @@ function startApp () {
   
   resizeCanvas();
   
+  /*
+  replaying=true;
   loadCurrent().then(
     startMissionLoop
   ).then(
     fit
-  );
+  ); 
+  */
+  
+  openWs(true);
 }
 
 function startMissionLoop () {
@@ -207,7 +206,6 @@ function startMissionLoop () {
 function messageHandler (msg) {
   // msg is the object returned by dorita980.getMission() promise.
   if (msg.cleanMissionStatus) {
-    // firmware version 2
     msg.ok = msg.cleanMissionStatus;
     msg.ok.pos = msg.pose;
     msg.ok.batPct = msg.batPct;
@@ -233,9 +231,9 @@ function messageHandler (msg) {
 
   drawStep(
     msg.ok.pos,
-    msg.ok.cycle,
     msg.ok.phase
   );
+
   $('#steps').html(steps.length);
   $('#mapStatus').html('');
 }
@@ -253,32 +251,25 @@ function drawSegment(x, y) {
   pathLayerContext.stroke();
 }
 
-function drawStep (pose, cycle, phase) {
+function drawStep (pose, phase) {
   x = pose.point.x;
   y = pose.point.y;
   theta = pose.theta;
 
-  if (phase === 'charge') {
-    // hack (getMission() dont send x,y if phase is diferent as run)
-    x = 0;
-    y = 0;
-  }
-
-
-  if (x!=lastX || y!=lastY || theta!=lastTheta) {
+  if (!replaying && (x!=lastX || y!=lastY || theta!=lastTheta)) {
     drawRobotBody(x, y, lastX, lastY, theta);
     lastTheta=theta;
   }
 
   if (x!=lastX || y!=lastY) {
     steps.push(pose);
-    drawSegment(x,y);
+    if (!replaying) drawSegment(x,y);
     lastX=x;
     lastY=y;
   }
 
   // draw changes in status with text.
-  if (phase !== lastPhase) {
+  if (!replaying && phase !== lastPhase) {
     phases.push({x,y,phase});
     drawPhase(x,y,phase);
     lastPhase = phase;
@@ -325,30 +316,81 @@ function drawRobotBody (x, y, prevX, prevY, theta) {
   robotBodyLayerContext.stroke();
 }
 
+function replay() {
+  replaying=true;
+  redraw();
+}
+function doReplay() {
+  if (replayStep<steps.length) {
+    for(var i=0; i<2 && i<steps.length-replayStep; i++) {
+      var item=steps[replayStep+i];
+      drawSegment(item.point.x, item.point.y);
+    }
+    replayStep+=i;
+    setTimeout(doReplay,0);
+  } else {
+    replaying=false;
+
+    if (phases.length>0) {
+      var item=phases[phases.length - 1];
+      drawPhase(item.x, item.y, item.phase);
+    }
+    
+    drawRobotBody(lastX, lastY, lastX, lastY, lastTheta);
+    console.log ('Replay completed '+steps.length+' steps');
+  }
+}
 function redraw() {
     scaleAndTranslateCanvases();
     
-    steps.forEach(function(item, index) {
-      drawSegment(item.point.x, item.point.y);
-    });
+    if (replaying) {
+      console.log ('Replaying...');
+      replayStep=0;
+      setTimeout(doReplay,0);
+    } else {
+      console.log ('Redrawing...');
+      steps.forEach(function(item, index) {
+        drawSegment(item.point.x, item.point.y);
+      });
 
-    phases.forEach(function(item, index) {
-      drawPhase(item.x, item.y, item.phase);
-    });
-    
-    drawRobotBody(lastX, lastY, lastX, lastY, lastTheta);
+      if (phases.length>0) {
+        var item=phases[phases.length - 1];
+        drawPhase(item.x, item.y, item.phase);
+      }
+      
+      drawRobotBody(lastX, lastY, lastX, lastY, lastTheta);
+      console.log ('Redraw completed '+steps.length+' steps');
+    }
 }
 
 function clearMap () {
   lastPhase = '';
   phases=[];
   steps=[];
+  minX=0;
+  minY=0;
+  maxX=0;
+  maxY=0;
+
   fit();
 }
 
-function toggleMapping () {
-  mapping = !mapping;
-  if (mapping) startMissionLoop();
+function toggleMapping (start) {
+  mapping = start;
+//  if (mapping) startMissionLoop();
+  if (mapping) {
+    clearMap();
+    openWs(true);
+  }
+  else closeWs();
+  
+  if (start) {
+    $('#start').hide();
+    $('#stop').show();
+  } else {
+    $('#start').show();
+    $('#stop').hide();
+  }
 }
 
 function getValue (name, actual) {
@@ -398,41 +440,6 @@ function saveValues () {
   });
 }
 
-/* $('.metrics').on('change', function () {
-  var toRedraw=false;
-  
-  var z = getValueFloat('#zoom', zoom);
-  if (zoom != z) {
-    zoom=z
-    toRedraw=true;
-  }
-  
-  var w = getValue('#sizew', pathLayer.width);
-  if (sizeX != w) {
-    sizeX=w;
-    toRedraw=true;
-  }
-
-  var h = getValue('#sizeh', pathLayer.height);
-  if (sizeY != h) {
-    sizeY=h;
-    toRedraw=true;
-  }
-
-  var newYOffset = getValue('#offsety', yOffset);
-  if (newYOffset !== yOffset) {
-    yOffset = newYOffset;
-    toRedraw=true;
-  }
-  var newXOffset = getValue('#offsetx', xOffset);
-  if (newXOffset !== xOffset) {
-    xOffset = newXOffset;
-    toRedraw=true;
-  }
-  
-  if (toRedraw) fit();  
-}); */
-
 $('.action').on('click', function () {
   var me = $(this);
   var path = me.data('action');
@@ -447,3 +454,94 @@ $('#updateevery').on('change', function () {
   updateEvery = getValue('#updateevery', updateEvery);
 });
 
+var lastRecPhase;
+
+function handleEvent (msg) {
+  var time = new Date().toISOString();
+  $('#last').html(time);
+  
+  if (msg.maxX) {
+    minX=msg.minX;
+    minY=msg.minY;
+    maxX=msg.maxX;
+    maxY=msg.maxY;
+    scale();
+  }
+
+  if (msg.cleanMissionStatus) {
+    // {"cleanMissionStatus":{"cycle":"none","phase":"charge","expireM":0,"rechrgM":0,"error":0,"notReady":0,"mssnM":5,"sqft":20,"initiator":"manual","nMssn":41}}
+    $('#cycle').html(msg.cleanMissionStatus.cycle);
+    $('#phase').html(msg.cleanMissionStatus.phase);
+    $('#expireM').html(msg.cleanMissionStatus.expireM);
+    $('#rechrgM').html(msg.cleanMissionStatus.rechrgM);
+    $('#error').html(msg.cleanMissionStatus.error);
+    $('#notReady').html(msg.cleanMissionStatus.notReady);
+    $('#mission').html(msg.cleanMissionStatus.mssnM);
+    $('#sqft').html(msg.cleanMissionStatus.sqft);
+    $('#nMssn').html(msg.cleanMissionStatus.nMssn);
+    lastRecPhase=msg.cleanMissionStatus.phase;
+  }
+
+  if (msg.pose) {
+    // {"pose":{"theta":-4,"point":{"x":36,"y":1}}}
+    $('#theta').html(msg.pose.theta);
+    $('#x').html(msg.pose.point.x);
+    $('#y').html(msg.pose.point.y);
+
+    drawStep(
+      msg.pose,
+      lastRecPhase
+    );
+  }
+  
+  if (msg.batPct) {
+    // {"batPct":100}
+    $('#batPct').html(msg.batPct);
+  }
+  
+  if (msg.bin) {
+    // {"bin":{"present":true,"full":false}}
+    $('#bin').html(msg.bin.present);
+    $('#full').html(msg.bin.full);
+  }
+
+  $('#steps').html(steps.length);
+}
+
+function closeWs() {
+  if (!webSocket.closed) {
+    webSocket.closed=true;
+    webSocket.close();
+  }
+}
+
+function openWs(load) {
+    var uri = load ? 'loadandevents' : 'events';
+    var l = window.document.location;
+    
+    var wsUrl = (l.protocol === 'https:' ? 'wss' : 'ws')+'://'+l.host+l.pathname+'/../missions/'+uri;
+		webSocket = new WebSocket(wsUrl);
+		
+		webSocket.onclose = function(event) {
+		  console.log('ws closed: code='+event.code);
+		  if (!webSocket.closed) setTimeout( openWs, 1000);
+		}
+
+		webSocket.onerror = function(event) {
+		  console.log('ws error: '+event);
+		}
+		
+		webSocket.onopen = function(event) {
+		  console.log('ws established');
+      if (load) {
+        replaying=true;
+//        setTimeout( redraw, 1000 );
+      } 
+		}
+		
+		webSocket.onmessage = function (event) {
+//		  console.log('ws: '+event.data);
+//		  setTimeout( function() { handleEvent(JSON.parse(event.data)) }, 1);
+		  handleEvent(JSON.parse(event.data));
+		}
+}
