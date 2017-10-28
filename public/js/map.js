@@ -1,9 +1,15 @@
-/*  global $ alert sizeX sizeY xOffset yOffset updateEvery */
+/*  global $ alert sizeX sizeY xOffset yOffset updateEvery mapChangeStatus WebSocket URL Blob */
 /*  eslint no-unused-vars: "off" */
 /*  eslint no-global-assign: "off" */
 /*  eslint no-native-reassign: "off" */
 
 window.onload = startApp;
+
+var xOffset;
+var yOffset;
+var sizeX;
+var sizeY;
+var updateEvery;
 
 var pathLayerContext;
 var robotBodyLayerContext;
@@ -27,78 +33,83 @@ var lastX;
 var lastY;
 var lastTheta;
 
-var steps=[];
-var phases=[];
+var steps = [];
+var phases = [];
 
-var replaying=false;
-var replayStep=0;
+var replaying = false;
+var replayStep = 0;
 
 var webSocket;
 
-function updateMinMax(x,y, autoScale) {
-  var changed=false;
+function updateMinMax (x, y, autoScale) {
+  var changed = false;
 
-  if (!minX || x<minX) {
-    minX=x;
-    changed=true;
+  if (!minX || x < minX) {
+    minX = x;
+    changed = true;
   }
 
-  if (!minY || y<minY) {
-    minY=y;
-    changed=true;
+  if (!minY || y < minY) {
+    minY = y;
+    changed = true;
   }
 
-  if (!maxX || x>maxX) {
-    maxX=x;
-    changed=true;
+  if (!maxX || x > maxX) {
+    maxX = x;
+    changed = true;
   }
 
-  if (!maxY || y>maxY) {
-    maxY=y;
-    changed=true;
+  if (!maxY || y > maxY) {
+    maxY = y;
+    changed = true;
   }
-  
+
   if (autoScale && changed) scale();
 }
 
-function scale(forcePan) {  
+function scale (forcePan) {
   var changed = false;
+  var border = forcePan ? 50 : 200;
   // autozoom
-  if (zoom>Math.min( sizeX/(maxX-minX), sizeY/(maxY-minY) ) || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX/zoom || maxY > -yOffset + sizeY/zoom) {
-    zoom=Math.min( sizeX/(maxX-minX+200), sizeY/(maxY-minY+200));
-    $('#zoom').val(zoom);
+  if (zoom > Math.min(sizeX / (maxX - minX), sizeY / (maxY - minY)) || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX / zoom || maxY > -yOffset + sizeY / zoom) {
+    zoom = Math.min(sizeX / (maxX - minX + 200), sizeY / (maxY - minY + 200), 1);
+    $('#zoom').html(zoom);
     changed = true;
   }
-  
-  if (forcePan || changed || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX/zoom || maxY > -yOffset + sizeY/zoom) {
-    xOffset = (-maxX - minX + sizeX/zoom) / 2;
-    yOffset = (-maxY - minY + sizeY/zoom) / 2;
+
+  if (forcePan || changed || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX / zoom || maxY > -yOffset + sizeY / zoom) {
+    xOffset = (-maxX - minX + sizeX / zoom) / 2;
+    yOffset = (-maxY - minY + sizeY / zoom) / 2;
+    if (!xOffset) xOffset = -sizeX / zoom / 2;
+    if (!yOffset) yOffset = -sizeX / zoom / 2;
     $('#offsetx').val(xOffset);
     $('#offsety').val(yOffset);
-    changed=true;
+    changed = true;
   }
-  
-  if (changed) redraw();
-  
+
+  if (changed) {
+    console.log('Scaling to (' + (-xOffset) + ',' + (-yOffset) + ') -> (' + (-xOffset + sizeX / zoom) + ',' + (-yOffset + sizeY / zoom) + ')');
+    redraw(true);
+  }
+
   return changed;
 }
 
-function center() {
+function center () {
   scale(true);
 }
 
-function fit() {
-  zoom=1;
-  $('#zoom').val(zoom);
+function fit () {
+  zoom = 1;
+  $('#zoom').html(zoom);
   scale(true);
 }
 
 $(window).resize(resizeCanvas);
 
-function resizeCanvas() {
-//  sizeX=window.innerWidth;
-  sizeX=$("#map").width();
-  sizeY=window.innerHeight-$("#menu").height()-20;
+function resizeCanvas () {
+  sizeX = $('#header').width();
+  sizeY = Math.max(100, Math.min(window.innerHeight, window.outerHeight) - $('#header').height() - $('#header').offset().top - ($(document.body).outerWidth(true) - $(document.body).width()));
 
   $('#sizew').val(sizeX);
   $('#sizeh').val(sizeY);
@@ -106,7 +117,7 @@ function resizeCanvas() {
   fit();
 }
 
-function scaleAndTranslateCanvases() {
+function scaleAndTranslateCanvases () {
   pathLayer.width = sizeX;
   pathLayer.height = sizeY;
 
@@ -123,36 +134,42 @@ function scaleAndTranslateCanvases() {
   pathLayerContext.translate(-xOffset, yOffset);
   robotBodyLayerContext.translate(-xOffset, yOffset);
   textLayerContext.translate(-xOffset, yOffset);
-  
+
   pathLayerContext.beginPath();
 }
 
-function loadCurrent() {
-  return new Promise(function(resolve, reject) {
-    console.log(new Date().toISOString()+" loading data");
-    $.get('missions/current', function (data) {
-        console.log(new Date().toISOString()+" processing data");
-        var lines = data.split('\n');
-        for(var i = 0;i < lines.length;i++){
-          var l=lines[i];
-          try {
-            if (l.charAt(0) === '{') {
-              var msg=JSON.parse(l);
-              if (msg.pose) {
-                updateMinMax(msg.pose.point.x, msg.pose.point.y);
-                steps.push(msg.pose);
-              }
+function loadCurrent () {
+  loadMap('missions/current');
+}
+
+function loadMap (url) {
+  return new Promise(function (resolve, reject) {
+    console.log(new Date().toISOString() + ' loading data');
+    $.get(url, function (data) {
+      console.log(new Date().toISOString() + ' processing data');
+      var lines = data.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        var l = lines[i];
+        try {
+          if (l.charAt(0) === '{') {
+            var msg = JSON.parse(l);
+            if (msg.pose) {
+              updateMinMax(msg.pose.point.x, msg.pose.point.y);
+              steps.push(msg.pose);
             }
-          } catch(e) {
-            console.log(l);
-            console.log(e);
           }
+        } catch (e) {
+          console.log(l);
+          console.log(e);
         }
-        console.log(new Date().toISOString()+" processing complete");
-        resolve();
+      }
+      console.log(new Date().toISOString() + ' processing complete');
+      resolve();
     });
   });
 }
+
+var mapOnStart; // Optionally set by ui
 
 function startApp () {
   pathLayer = document.getElementById('path_layer');
@@ -167,6 +184,8 @@ function startApp () {
 
   $('#updateevery').val(updateEvery);
 
+  $('#start').hide();
+
   pathLayerContext = pathLayer.getContext('2d');
   robotBodyLayerContext = robotBodyLayer.getContext('2d');
   textLayerContext = textLayer.getContext('2d');
@@ -175,19 +194,14 @@ function startApp () {
   pathLayerContext.lineWidth = 1;
   pathLayerContext.strokeStyle = '#000000';
   pathLayerContext.lineCap = 'round';
-  
+
   resizeCanvas();
-  
-  /*
-  replaying=true;
-  loadCurrent().then(
-    startMissionLoop
-  ).then(
-    fit
-  ); 
-  */
-  
-  openWs(true);
+
+  if (mapOnStart) {
+    mapOnStart();
+  } else {
+    openWs(true);
+  }
 }
 
 function startMissionLoop () {
@@ -238,65 +252,66 @@ function messageHandler (msg) {
   $('#mapStatus').html('');
 }
 
-function drawPhase(x,y,phase) {
-  x=sizeX/zoom-x;
-  textLayerContext.font = 'normal '+(12/zoom)+'pt Calibri';
+function drawPhase (x, y, phase) {
+  x = sizeX / zoom - x;
+  textLayerContext.font = 'normal ' + (12 / zoom) + 'pt Calibri';
   textLayerContext.fillStyle = 'blue';
-  textLayerContext.fillText(phase, x+calcRadio(), y);
+  textLayerContext.fillText(phase, x + calcRadio(), y);
 }
 
-function drawSegment(x, y) {
-  x=sizeX/zoom-x;
+function drawSegment (x, y, stroke) {
+  x = sizeX / zoom - x;
   pathLayerContext.lineTo(x, y);
-  pathLayerContext.stroke();
+  if (stroke) {
+    pathLayerContext.stroke();
+  }
 }
 
 function drawStep (pose, phase) {
-  x = pose.point.x;
-  y = pose.point.y;
-  theta = pose.theta;
+  var x = pose.point.x;
+  var y = pose.point.y;
+  var theta = pose.theta;
 
-  if (!replaying && (x!=lastX || y!=lastY || theta!=lastTheta)) {
+  if (!replaying && (x !== lastX || y !== lastY || theta !== lastTheta)) {
     drawRobotBody(x, y, lastX, lastY, theta);
-    lastTheta=theta;
+    lastTheta = theta;
   }
 
-  if (x!=lastX || y!=lastY) {
+  if (x !== lastX || y !== lastY) {
     steps.push(pose);
-    if (!replaying) drawSegment(x,y);
-    lastX=x;
-    lastY=y;
+    if (!replaying) drawSegment(x, y, true);
+    lastX = x;
+    lastY = y;
   }
 
   // draw changes in status with text.
   if (!replaying && phase !== lastPhase) {
-    phases.push({x,y,phase});
-    drawPhase(x,y,phase);
+    phases.push({x, y, phase});
+    drawPhase(x, y, phase);
     lastPhase = phase;
-  } 
+  }
 
-  updateMinMax(x,y,true);
-  
+  updateMinMax(x, y, true);
 }
 
-function calcRadio() {
+function calcRadio () {
   var radio = 15;
-  if (radio*zoom < 5) radio=5/zoom;
-  if (radio*zoom > 30) radio=30/zoom;
-  
+  if (radio * zoom < 5) radio = 5 / zoom;
+  if (radio * zoom > 30) radio = 30 / zoom;
+
   return radio;
 }
 
 function drawRobotBody (x, y, prevX, prevY, theta) {
-  x=sizeX/zoom-x;
-  prevX=sizeX/zoom-prevX;
-  
+  x = sizeX / zoom - x;
+  prevX = sizeX / zoom - prevX;
+
   theta = parseInt(theta, 10);
   var radio = calcRadio();
-  
-  var lineWidth = radio/5;
-  
-  robotBodyLayerContext.clearRect(prevX-radio-5, prevY-radio-5, 2*radio+10, 2*+radio+10);
+
+  var lineWidth = radio / 5;
+
+  robotBodyLayerContext.clearRect(prevX - radio - 5, prevY - radio - 5, 2 * radio + 10, 2 * radio + 10);
   robotBodyLayerContext.beginPath();
   robotBodyLayerContext.arc(x, y, radio, 0, 2 * Math.PI, false);
   robotBodyLayerContext.fillStyle = 'green';
@@ -316,74 +331,67 @@ function drawRobotBody (x, y, prevX, prevY, theta) {
   robotBodyLayerContext.stroke();
 }
 
-function replay() {
-  replaying=true;
+function replay () {
+  replaying = true;
   redraw();
 }
-function doReplay() {
-  if (replayStep<steps.length) {
-    for(var i=0; i<2 && i<steps.length-replayStep; i++) {
-      var item=steps[replayStep+i];
-      drawSegment(item.point.x, item.point.y);
+function doReplay () {
+  if (replayStep < steps.length) {
+    var stepsPerCycle = (replaying ? 2 : 500);
+    for (var i = 0; i < stepsPerCycle && i < steps.length - replayStep; i++) {
+      var step = steps[replayStep + i];
+      drawSegment(step.point.x, step.point.y, false);
     }
-    replayStep+=i;
-    setTimeout(doReplay,0);
+    pathLayerContext.stroke();
+    replayStep += i;
+    setTimeout(doReplay, 0);
   } else {
-    replaying=false;
-
-    if (phases.length>0) {
-      var item=phases[phases.length - 1];
-      drawPhase(item.x, item.y, item.phase);
+    if (phases.length > 0) {
+      var p = phases[phases.length - 1];
+      drawPhase(p.x, p.y, p.phase);
     }
-    
+
     drawRobotBody(lastX, lastY, lastX, lastY, lastTheta);
-    console.log ('Replay completed '+steps.length+' steps');
+    console.log((replaying ? 'Replay' : 'Redraw') + ' completed ' + steps.length + ' steps');
+
+    $('#steps').html(steps.length);
+
+    replaying = false;
   }
 }
-function redraw() {
-    scaleAndTranslateCanvases();
-    
-    if (replaying) {
-      console.log ('Replaying...');
-      replayStep=0;
-      setTimeout(doReplay,0);
-    } else {
-      console.log ('Redrawing...');
-      steps.forEach(function(item, index) {
-        drawSegment(item.point.x, item.point.y);
-      });
-
-      if (phases.length>0) {
-        var item=phases[phases.length - 1];
-        drawPhase(item.x, item.y, item.phase);
-      }
-      
-      drawRobotBody(lastX, lastY, lastX, lastY, lastTheta);
-      console.log ('Redraw completed '+steps.length+' steps');
-    }
+function redraw (now) {
+  scaleAndTranslateCanvases();
+  console.log(replaying ? 'Replaying...' : 'Redrawing...');
+  replayStep = 0;
+  if (now) {
+    doReplay();
+  } else {
+    setTimeout(doReplay, 0);
+  }
 }
 
 function clearMap () {
   lastPhase = '';
-  phases=[];
-  steps=[];
-  minX=0;
-  minY=0;
-  maxX=0;
-  maxY=0;
+  phases = [];
+  steps = [];
+  minX = 0;
+  minY = 0;
+  maxX = 0;
+  maxY = 0;
 
   fit();
 }
 
 function toggleMapping (start) {
   mapping = start;
-//  if (mapping) startMissionLoop();
   if (mapping) {
     clearMap();
-    openWs(true);
+    reconnectWs(true);
+  } else {
+    reconnectWs(false, true);
+    if (mapChangeStatus) mapChangeStatus.phase();
   }
-  else closeWs();
-  
+
   if (start) {
     $('#start').hide();
     $('#stop').show();
@@ -426,26 +434,32 @@ function downloadCanvas () {
 
 function downloadSteps () {
   var json = JSON.stringify(steps);
-  var blob = new Blob([json], {type: "application/json"});
-  var url  = URL.createObjectURL(blob);
+  var blob = new Blob([json], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
   document.getElementById('downloadData').href = url;
   document.getElementById('downloadData').download = 'current_data.json';
 }
 
 function saveValues () {
   var values = {
-    'pointIntervalMs': updateEvery,
+    'pointIntervalMs': updateEvery
   };
   $.post('/map/values', values, function (data) {
+  });
+}
+
+function doAction (path, cb) {
+  $.get(path, function (data) {
+    if (cb) cb(data);
   });
 }
 
 $('.action').on('click', function () {
   var me = $(this);
   var path = me.data('action');
-  me.button('loading');
+  if (me.button) me.button('loading');
   $.get(path, function (data) {
-    me.button('reset');
+    if (me.button) me.button('reset');
     $('#apiresponse').html(JSON.stringify(data));
   });
 });
@@ -459,13 +473,20 @@ var lastRecPhase;
 function handleEvent (msg) {
   var time = new Date().toISOString();
   $('#last').html(time);
-  
+
+  if (msg.action === 'clear') {
+    clearMap();
+  }
+
   if (msg.maxX) {
-    minX=msg.minX;
-    minY=msg.minY;
-    maxX=msg.maxX;
-    maxY=msg.maxY;
-    scale();
+    minX = msg.minX;
+    minY = msg.minY;
+    maxX = msg.maxX;
+    maxY = msg.maxY;
+    var rep = replaying;
+    replaying = false;
+    fit();
+    replaying = rep;
   }
 
   if (msg.cleanMissionStatus) {
@@ -479,7 +500,9 @@ function handleEvent (msg) {
     $('#mission').html(msg.cleanMissionStatus.mssnM);
     $('#sqft').html(msg.cleanMissionStatus.sqft);
     $('#nMssn').html(msg.cleanMissionStatus.nMssn);
-    lastRecPhase=msg.cleanMissionStatus.phase;
+    lastRecPhase = msg.cleanMissionStatus.phase;
+
+    if (mapChangeStatus) mapChangeStatus.phase(msg.cleanMissionStatus.phase, msg.cleanMissionStatus.cycle);
   }
 
   if (msg.pose) {
@@ -492,56 +515,93 @@ function handleEvent (msg) {
       msg.pose,
       lastRecPhase
     );
+
+    $('#steps').html(steps.length);
   }
-  
+
   if (msg.batPct) {
-    // {"batPct":100}
     $('#batPct').html(msg.batPct);
+    if (mapChangeStatus) mapChangeStatus.batPct(msg.batPct);
   }
-  
+
   if (msg.bin) {
     // {"bin":{"present":true,"full":false}}
     $('#bin').html(msg.bin.present);
     $('#full').html(msg.bin.full);
+    if (mapChangeStatus) mapChangeStatus.bin(msg.bin.present, msg.bin.full);
   }
-
-  $('#steps').html(steps.length);
 }
 
-function closeWs() {
+function reconnectWs (load, statusOnly) {
+  if (webSocket && !webSocket.closed) {
+    webSocket.onclose = function (event) {
+      console.log('ws closed: code=' + event.code);
+      openWs(load, statusOnly);
+    };
+
+    webSocket.closed = true;
+    webSocket.close();
+  } else {
+    openWs(load, statusOnly);
+  }
+}
+
+function closeWs () {
   if (!webSocket.closed) {
-    webSocket.closed=true;
+    webSocket.closed = true;
     webSocket.close();
   }
 }
 
-function openWs(load) {
-    var uri = load ? 'loadandevents' : 'events';
-    var l = window.document.location;
-    
-    var wsUrl = (l.protocol === 'https:' ? 'wss' : 'ws')+'://'+l.host+l.pathname+'/../missions/'+uri;
-		webSocket = new WebSocket(wsUrl);
-		
-		webSocket.onclose = function(event) {
-		  console.log('ws closed: code='+event.code);
-		  if (!webSocket.closed) setTimeout( openWs, 1000);
-		}
+function openWs (load, statusOnly) {
+  $('#map_name').html('current');
 
-		webSocket.onerror = function(event) {
-		  console.log('ws error: '+event);
-		}
-		
-		webSocket.onopen = function(event) {
-		  console.log('ws established');
-      if (load) {
-        replaying=true;
-//        setTimeout( redraw, 1000 );
-      } 
-		}
-		
-		webSocket.onmessage = function (event) {
-//		  console.log('ws: '+event.data);
-//		  setTimeout( function() { handleEvent(JSON.parse(event.data)) }, 1);
-		  handleEvent(JSON.parse(event.data));
-		}
+  var uri = statusOnly ? 'status' : load ? 'loadandevents' : 'events';
+  var l = window.document.location;
+
+  var wsUrl = (l.protocol === 'https:' ? 'wss' : 'ws') + '://' + l.host + l.pathname + '/../missions/' + uri;
+  webSocket = new WebSocket(wsUrl);
+
+  webSocket.onclose = function (event) {
+    console.log('ws closed: code=' + event.code);
+    if (!webSocket.closed) {
+      setTimeout(function () {
+        openWs(false, statusOnly);
+      }, 1000);
+    }
+  };
+
+  webSocket.onerror = function (event) {
+    console.log('ws error: ' + event);
+  };
+
+  webSocket.onopen = function (event) {
+    console.log('ws established for ' + uri);
+    if (load && !statusOnly) {
+      replaying = true;
+      setTimeout(redraw, 1000);
+    }
+  };
+
+  webSocket.onmessage = function (event) {
+    handleEvent(JSON.parse(event.data));
+  };
+}
+
+function mapSelected (map) {
+  toggleMapping(false);
+  $('#map_name').html(map.name);
+  if (map.name === 'current') {
+    toggleMapping(true);
+  } else {
+    clearMap();
+    setTimeout(function () {
+      replaying = true;
+      loadMap(map.url).then(fit);
+    }, 10);
+  }
+}
+
+function loadMissions (cb) {
+  $.get('missions', cb);
 }

@@ -3,10 +3,9 @@ var router = express.Router();
 var jsonfile = require('jsonfile');
 var valuesPath = './config/mapvalues.json';
 
-
 router.get('/', function (req, res) {
   var mapvalues = jsonfile.readFileSync(valuesPath);
-  res.render('map', {title: 'Map (experimental)', mapvalues: mapvalues, rootPath: '.'});
+  res.render('bmap', {title: 'Roomba Map', mapvalues: mapvalues, rootPath: '.'});
 });
 
 router.post('/values', function (req, res) {

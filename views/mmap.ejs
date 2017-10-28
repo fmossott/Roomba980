@@ -1,0 +1,345 @@
+<% include mheader.ejs %>
+
+<style scoped>
+  :root {
+    --mdc-theme-primary:     #009688;
+    --mdc-theme-secondary:   #7c4dff;
+    --mdc-theme-background:  #f0f0f0;
+  }
+
+  .onTopOfEachOther {
+      position: relative;
+  }
+  .onTopOfEachOther section {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+  }
+  
+  .map-selection-card {
+    margin: auto;
+    width: 80%;
+    margin-top: 20px;
+  }
+</style>
+
+<!-- Secondary Fab Buttons -->
+<div class="map-sec-fixed-fab-cont">
+  <div>
+    <button class="mdc-fab map-sec-fab mdc-fab--mini mdc-fab--exited" id='sec-fab-dock' data-mdc-auto-init="MDCRipple">
+      <span class="mdc-fab__icon material-icons">home</span>
+    </button>
+  </div>
+  <div>
+    <button class="mdc-fab map-sec-fab mdc-fab--mini mdc-fab--exited" id='sec-fab-stop' data-mdc-auto-init="MDCRipple">
+      <span class="mdc-fab__icon material-icons">stop</span>
+    </button>
+  </div>
+</div>
+
+<!-- Main Fab Button -->
+<button class="mdc-fab map-fixed-fab mdc-fab--exited map-main-fab" id='main-fab-play' data-mdc-auto-init="MDCRipple">
+  <span class="mdc-fab__icon material-icons">play_arrow</span>
+</button>
+<button class="mdc-fab map-fixed-fab mdc-fab--exited map-main-fab" id='main-fab-pause' data-mdc-auto-init="MDCRipple">
+  <span class="mdc-fab__icon material-icons">pause</span>
+</button>
+
+<header class="mdc-toolbar mdc-toolbar--fixed">
+  <div class="mdc-toolbar__row">
+    <section class="mdc-toolbar__section mdc-toolbar__section--align-start map-home-header">
+      <span class="map-menu">
+        <a href="#" class="mdc-toolbar__menu-icon"><i class="material-icons">menu</i></a>
+      </span>
+      <span class="mdc-toolbar__title" style="width: 100%;">Roomba Live Map</span>
+    </section>
+    <section class="mdc-toolbar__section mdc-toolbar__section--align-start map-sub-header">
+      <span class="map-back">
+        <a href="#" class="mdc-toolbar__menu-icon"><i class="material-icons">arrow_back</i></a>
+      </span>
+      <span class="mdc-toolbar__title map-sub-title"></span>
+    </section>
+    <section class="mdc-toolbar__section mdc-toolbar__section--align-end mdc-toolbar__section--shrink-to-fit">
+      <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_binfull"><i class="material-icons">delete</i></span>
+      <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_binmissing"><i class="material-icons">delete_forever</i></span>
+      <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_mission"><i class="material-icons">play_circle_filled</i></span>
+      <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_dock"><i class="material-icons">home</i></span>
+      <span class="mdc-toolbar__icon map-icon-no-pointer" id="map_icon_battery"><i id="map_icon_battery_charging" class="material-icons map-hidden">battery_charging_full</i><i id="map_icon_battery_std" class="material-icons">battery_std</i><span id="map_icon_battery_qty">--</span>%</span>
+    </section>
+  </div>
+</header>
+
+<aside class="mdc-temporary-drawer">
+  <nav class="mdc-temporary-drawer__drawer">
+    <header class="mdc-temporary-drawer__header">
+      <div class="mdc-temporary-drawer__header-content mdc-theme--primary-bg mdc-theme--text-primary-on-primary">
+        Map actions
+      </div>
+    </header>
+    <nav class="mdc-temporary-drawer__content mdc-list-group">
+      <div class="mdc-list">
+        <a class="mdc-list-item mdc-temporary-drawer--selected" onclick='drawer.open = false; loadMapList();'>
+          <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">list</i>Select map
+        </a>
+        <a class="mdc-list-item" onclick='drawer.open = false; clearMap();'>
+          <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">clear</i>Clear map
+        </a>
+        <a class="mdc-list-item" onclick='drawer.open = false; replay();'>
+          <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">replay</i>Replay
+        </a>
+        <a class="mdc-list-item" id='start' onclick='drawer.open = false; toggleMapping(true);'>
+          <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">play_arrow</i>Start live
+        </a>
+        <a class="mdc-list-item" id='stop' onclick='drawer.open = false; toggleMapping(false);'>
+          <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">stop</i>Stop mapping
+        </a>
+      </div>
+
+      <hr class="mdc-list-divider">
+
+      <div class="mdc-list">
+        <a class="mdc-list-item" id='download' onclick='downloadCanvas();'>
+          <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">file_download</i>Download Image
+        </a>
+      </div>
+    </nav>
+  </nav>
+</aside>
+
+<main>
+  <div class="mdc-toolbar-fixed-adjust" id='header'></div>
+
+  <!-- Map -->
+  <div id="map" class="map-home-page" style="position: absolute;">
+    <canvas id="path_layer" style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+    <canvas id="robot_body_layer" style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+    <canvas id="text_layer" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+  </div>
+  <div id="maplist" class="map-sub-page" style="position: absolute; display: none; width: 100%;">
+    <div class="mdc-card map-selection-card">
+      <section class="mdc-card__supporting-text">
+        <nav class="mdc-list" id='map_selection_list' data-demo-interactive-list>
+        </nav>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<div id="map-snackbar" class="mdc-snackbar" aria-live="assertive" aria-atomic="true" aria-hidden="true">
+  <div class="mdc-snackbar__text"></div>
+  <div class="mdc-snackbar__action-wrapper">
+    <button type="button" class="mdc-snackbar__action-button"></button>
+  </div>
+</div>
+
+<script src="<%=rootPath%>/js/map.js"></script>
+
+<script src="material-components-web/dist/material-components-web.js"></script>
+
+<script>
+  // Drawer
+  var drawerEl = document.querySelector('.mdc-temporary-drawer');
+  var MDCTemporaryDrawer = mdc.drawer.MDCTemporaryDrawer;
+  var drawer = new MDCTemporaryDrawer(drawerEl);
+
+  drawerEl.addEventListener('MDCTemporaryDrawer:open', function() {
+    console.log('Received MDCTemporaryDrawer:open');
+  });
+  drawerEl.addEventListener('MDCTemporaryDrawer:close', function() {
+    console.log('Received MDCTemporaryDrawer:close');
+  });
+  
+  $('.map-menu').click( () => {
+    drawer.open = true;
+    return false;
+  });
+
+  // Navigation
+  $('.map-back').click( () => {
+    history.back();
+    return false;
+  });
+
+  function showHome() {
+    $('.map-home-page').show();
+    $('.map-sub-page').hide();
+    $('.map-home-header').show();
+    $('.map-sub-header').hide();
+    mainFabPath=null;
+  }
+  
+  function openSubMap(title) {
+    drawer.open = false;
+    $('.map-sub-title').html(title);
+    $('.map-sub-page').hide();
+    $('.map-home-page').show();
+    $('.map-home-header').hide();
+    $('.map-sub-header').show();
+    mapChangeStatus.phase();
+  }  
+
+  function openSub(subSel, title) {
+    drawer.open = false;
+    $('.map-sub-title').html(title);
+    $('.map-home-page').hide();
+    $(subSel).show();
+    $('.map-home-header').hide();
+    $('.map-sub-header').show();
+    mapChangeStatus.phase();
+  }  
+
+  // Hide at startup
+  $('.map-sub-page').hide();
+  $('.map-sub-header').hide();
+  
+  // FAB & Toolbar icons
+  
+  var mainFabPath;
+
+  $('.map-main-fab').click(function() {
+    if (mainFabPath) doAction(mainFabPath,showResult);
+    return false;
+  })
+  
+  $('#sec-fab-stop').click(function() {
+    doAction('api/local/action/stop',showResult);
+    return false;
+  })
+  
+  $('#sec-fab-dock').click(function() {
+    doAction('api/local/action/dock',showResult);
+    return false;
+  })
+  
+  var snackbar = new mdc.snackbar.MDCSnackbar($('#map-snackbar')[0]);
+
+  function showResult(res) {
+    snackbar.dismissesOnAction = true;
+    var data =  {
+      message: JSON.stringify(res),
+      timeout: 1000
+    };
+
+    snackbar.show(data);
+  };
+  
+  var mapChangeStatus = {
+    phase: function(phase, cycle) {
+      if (phase) {
+        // Main FAB:
+        if (['run','hmMidMsn','hmPostMsn', 'hmUsrDock'].indexOf(phase) > -1) {
+          // Main FAB is Pause
+          mainFabPath='api/local/action/pause';
+          $('#main-fab-play').addClass('mdc-fab--exited');
+          $('#main-fab-pause').removeClass('mdc-fab--exited');
+        } else {
+          if (cycle === 'none') {
+            // Main FAB is Start
+            console.log('Main FAB is Start');
+            mainFabPath='api/local/action/start';
+          } else {
+            // Main FAB is Resume
+            console.log('Main FAB is Resume');
+            mainFabPath='api/local/action/resume';
+          }
+          $('#main-fab-pause').addClass('mdc-fab--exited');
+          $('#main-fab-play').removeClass('mdc-fab--exited');
+        }
+        
+        // Dock FAB if phase is not hmMidMsn, hmPostMsn, hmUsrDock, charge
+        var dockEnabled = (['charge','hmMidMsn','hmPostMsn', 'hmUsrDock'].indexOf(phase) <= -1);
+        $('#sec-fab-dock').toggleClass('mdc-fab--exited',!dockEnabled);
+        $('#map_icon_dock').toggleClass('map-hidden',dockEnabled);
+        
+        // Stop FAB is cycle is not none
+        var hasMission=(cycle != 'none');
+        $('#sec-fab-stop').toggleClass('mdc-fab--exited',!hasMission);
+        $('#map_icon_mission').toggleClass('map-hidden',!hasMission);
+        
+        var charging=(phase === 'charge');
+        $('#map_icon_battery_charging').toggleClass('map-hidden',!charging);
+        $('#map_icon_battery_std').toggleClass('map-hidden',charging);
+        
+      }
+    },
+
+    batPct: function(bat) {
+      $('#map_icon_battery').removeClass('map-hidden');
+      $('#map_icon_battery_qty').text(bat);
+    },
+
+    bin: function(present, full) {
+      $('#map_icon_binfull').toggleClass('map-hidden', !full);
+      $('#map_icon_binmissing').toggleClass('map-hidden', present);
+    }
+  }
+
+  // Map Selection
+  function loadMapList() {
+    var list=$('#map_selection_list');
+    list.html("");
+
+    loadMissions(function (data) {
+      var maps=data.sort().reverse();
+
+      maps.forEach( (map) => {
+        if (map.name != 'current') {
+          var li = $('<a>').attr('href','#').addClass("mdc-list-item")
+            .append($('<i>').addClass("mdc-list-item__start-detail material-icons").attr("aria-hidden","true").html("map"))
+            .append($('<span>').addClass("mdc-list-item__text").attr("aria-hidden","true").html(map.name)
+              .append($('<span>').addClass("mdc-list-item__text__secondary").html(map.steps+' steps'))
+            );
+
+          li.data('map',map);
+          list.append(li);
+        }
+      });
+    });
+
+    openSub('#maplist','Map Selection');
+  }
+  
+  $('#map_selection_list').on( 'click', '.mdc-list-item', function () {
+    var ripple = new mdc.ripple.MDCRipple(this);
+    ripple.activate();
+    
+    var map=$(this).data('map');
+
+    history.pushState(map, map.name);
+
+    setTimeout(function (){openMap(map)}, 100);
+    return false;
+  });  
+  
+  function openMap(map) {
+    openSubMap('Roomba Map: '+map.name);
+    mapSelected(map);  
+  }
+  
+  // History
+  
+  var currentState = history.state;
+  
+  mapOnStart = function() {
+    posState({ state: currentState });
+  }
+  
+  function posState(event) {
+    console.log('location: ' + document.location + ', state: ' + JSON.stringify(event.state));
+    if (event.state) {
+      openMap(event.state);
+    } else {
+      toggleMapping(true);
+      showHome();
+    }
+  }
+  
+  window.onpopstate = posState;
+
+</script>
+
+<script>mdc.autoInit()</script>
+
+
+<% include mfooter.ejs %>

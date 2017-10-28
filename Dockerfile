@@ -1,7 +1,7 @@
 # Use latest node
 FROM node:boron
 
-MAINTAINER koalazak <zak.tux@gmail.com>
+LABEL repository="https://github.com/fmossott/rest980"
 
 # Create app directory
 RUN mkdir -p /usr/src/app
@@ -28,6 +28,7 @@ ENV KEEP_ALIVE=
 ENV SSL_KEY_FILE=
 ENV SSL_CERT_FILE=
 ENV PORT=3000
+ENV ROOT_PATH=
 
 EXPOSE ${PORT}
 

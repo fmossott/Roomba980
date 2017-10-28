@@ -1,0 +1,58 @@
+.data {
+  font-weight: bold;
+  text-align: left;
+}
+
+.info {
+  font-size: small;
+  border-spacing: 1px;
+  border-collapse: separate;
+  opacity: 0.6;
+}
+
+.map-absolute-fab,
+.map-fixed-fab {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 100;
+}
+
+.map-fixed-fab {
+  position: fixed;
+}
+
+.map-sec-fab {
+  margin: 8px;
+}
+
+.map-sec-fixed-fab-cont {
+  position: fixed;
+  bottom: 5rem;
+  right: 1rem;
+  z-index: 100;
+}
+
+@media(min-width: 1024px) {
+  .map-fixed-fab {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .map-sec-fixed-fab-cont {
+    bottom: 5.5rem;
+    right: 1.5rem;
+  }
+}
+
+.map-icon-container {
+  white-space: nowrap;
+}
+
+.map-hidden {
+  display: none;
+}
+
+.map-icon-no-pointer {
+  cursor: default;
+}

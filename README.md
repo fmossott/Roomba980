@@ -1,12 +1,12 @@
 # rest980
-[![Build Status](https://travis-ci.org/koalazak/rest980.svg?branch=master)](https://travis-ci.org/koalazak/rest980)
-[![dependencies Status](https://david-dm.org/koalazak/rest980/status.svg)](https://david-dm.org/koalazak/rest980)
+[![Build Status](https://travis-ci.org/fmossott/rest980.svg?branch=master)](https://travis-ci.org/fmossott/rest980)
+[![dependencies Status](https://david-dm.org/fmossott/rest980/status.svg)](https://david-dm.org/fmossott/rest980)
 
-rest980 create a http server to map all [dorita980](https://github.com/koalazak/dorita980) methods in a REST API to control your iRobot Roomba 980 via HTTP requests.
+rest980 create a http server to map all [dorita980](https://github.com/fmossott/dorita980) methods in a REST API to control your iRobot Roomba 980 via HTTP requests.
 
 ## Install
 ```bash
-$ git clone https://github.com/koalazak/rest980.git
+$ git clone https://github.com/fmossott/rest980.git
 $ cd rest980
 $ npm install
 ```
@@ -32,6 +32,8 @@ The service can be configured by editing `config/default.json` or by setting env
 |basicAuthPass|BASIC_AUTH_PASS|*(optional)* Set to enable basic auth. Both user and pass must be set.|
 |sslKeyFile|SSL_KEY_FILE|*(optional)* Set path to key file to enable HTTPS. Both key and cert must be set. [(how to create self signed cert)](http://www.akadia.com/services/ssh_test_certificate.html)|
 |sslCertFile|SSL_CERT_FILE|*(optional)* Set path to cert file to enable HTTPS. Both key and cert must be set. [(how to create self signed cert)](http://www.akadia.com/services/ssh_test_certificate.html)|
+|rootPath|ROOT_PATH|*(optional)* Set base path of the rest980 urls. This is useful when using a reverse proxy in front shared with other applications.|
+
 
 *See [dorita980](https://github.com/koalazak/dorita980) for more information and instructions for obtaining your robot blid and password*
 
@@ -48,24 +50,24 @@ omit `DEBUG=rest980:*` if you want. You can just run with `npm start`
 
 ## Or use Docker Image
 
-You can use [koalazak/rest980](https://hub.docker.com/r/koalazak/rest980/) docker image to run this server in a docker container. Usefull to run on [Synology](https://www.synology.com/en-global/) for example.
+You can use [fmossott/rest980](https://hub.docker.com/r/fmossott/rest980/) docker image to run this server in a docker container.
 
 Pull Docker image:
 ```bash
-docker pull koalazak/rest980
+docker pull fmossott/rest980
 ```
 
 Run Docker image:
 ```
-docker run -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP koalazak/rest980
+docker run -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP -e ROOT_PATH=roomba fmossott/rest980
 ```
 
 ## Dockerfile
 
-Also you can local build and test in Docker from this [Dockerfile](https://github.com/koalazak/rest980/blob/master/Dockerfile)
+Also you can local build and test in Docker from this [Dockerfile](https://github.com/fmossott/rest980/blob/master/Dockerfile)
 
 ```
-docker build . -t koalazak/rest980 
+docker build . -t fmossott/rest980 
 ```
 
 ## API documentation
@@ -262,13 +264,16 @@ Success Response:
 
 You can add images or files to `public/` folder to serve static files.
 
-## Realtime Map (experimental)
+## Realtime Map
 
-Visiting  `http://serverIP:3000/map` with your browser you can play with this cool experiment
+Visiting  `http://serverIP:3000/map` to monitor your roomba activities in real time and access to previous cleaning missions
 
-![/map](https://cloud.githubusercontent.com/assets/8185092/20685415/23e2ed58-b593-11e6-8492-280cc381abda.png)
+![/map](https://raw.githubusercontent.com/fmossott/rest980/master/doc/Roomba%20Map%20-%20Map.png)
 
-[![iRobot Roomba 980 cleaning map using dorita980 lib](https://img.youtube.com/vi/XILvHFEX7TM/0.jpg)](https://www.youtube.com/watch?v=XILvHFEX7TM)
+Map actions
+![/drawer](https://raw.githubusercontent.com/fmossott/rest980/master/doc/Roomba%20Map%20-%20Drawer.png) 
 
-Video: Realtime cleaning map
+Map selection list
+![/maplist](https://github.com/fmossott/rest980/blob/master/doc/Roomba%20Map%20-%20Map%20List.png)
+
 

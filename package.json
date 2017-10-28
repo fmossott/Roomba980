@@ -12,9 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/koalazak/rest980.git"
+    "url": "git+https://github.com/fmossott/rest980.git"
   },
   "dependencies": {
+    "@material/auto-init": "^0.24.0",
+    "@material/drawer": "^0.24.0",
+    "@material/fab": "^0.24.0",
+    "@material/list": "^0.24.0",
+    "@material/toolbar": "^0.24.0",
     "basic-auth": "1.1.0",
     "body-parser": "^1.16.0",
     "config": "^1.21.0",
@@ -24,7 +29,8 @@
     "ejs": "^2.5.2",
     "express": "^4.14.0",
     "express-ws": "^3.0.0",
-    "jsonfile": "^3.0.0",
+    "jsonfile": "^4.0.0",
+    "material-components-web": "^0.24.0",
     "morgan": "^1.7.0",
     "ws": "^3.2.0"
   },
@@ -57,10 +63,10 @@
     "mapping",
     "vslam"
   ],
-  "author": "koalazak <zak.tux@gmail.com>",
+  "author": "fmossott",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/koalazak/rest980/issues"
+    "url": "https://github.com/fmossott/rest980/issues"
   },
-  "homepage": "https://github.com/koalazak/rest980#readme"
+  "homepage": "https://github.com/fmossott/rest980#readme"
 }

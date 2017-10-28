@@ -11,22 +11,13 @@ var robot = require('./lib/robot');
 
 var helloRoute = require('./routes/index');
 var apiRoute = require('./routes/api')(robot);
-var mapRoute = require('./routes/map');
+var bmapRoute = require('./routes/bmap');
+var mmapRoute = require('./routes/mmap');
 var missionsRoute = require('./routes/missions')(robot);
 
-var rootPath = config.rootPath || '';
+var rootPath = process.env.ROOT_PATH || config.rootPath || '';
 
 var app = express();
-
-Date.prototype.yyyymmdd = function() {
-  var mm = this.getMonth() + 1; // getMonth() is zero-based
-  var dd = this.getDate();
-
-  return [this.getFullYear(),
-          (mm>9 ? '' : '0') + mm,
-          (dd>9 ? '' : '0') + dd
-         ].join('');
-};
 
 // Authentication handler
 var basicAuthUser = process.env.BASIC_AUTH_USER || config.basicAuthUser;
@@ -66,12 +57,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(rootPath, express.static(path.join(__dirname, 'public')));
+app.use(rootPath + '/material-components-web/dist', express.static(path.join(__dirname, 'node_modules/material-components-web/dist')));
 app.use(authHandler);
 
-app.use(rootPath+'/', helloRoute);
-app.use(rootPath+'/api', apiRoute);
-app.use(rootPath+'/map', mapRoute);
-app.use(rootPath+'/missions', missionsRoute);
+app.use(rootPath + '/', helloRoute);
+app.use(rootPath + '/api', apiRoute);
+app.use(rootPath + '/bmap', bmapRoute);
+app.use(rootPath + '/map', mmapRoute);
+app.use(rootPath + '/missions', missionsRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -85,7 +78,7 @@ app.use(function (req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function (err, req, res, next) {
+  app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.send({
       message: err.message,
@@ -96,7 +89,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
   res.status(err.status || 500);
   res.send({
     message: err.message,

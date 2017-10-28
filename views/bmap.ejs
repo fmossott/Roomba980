@@ -1,40 +1,58 @@
 <% include header.ejs %>
-<script type="text/javascript">
-
-var xOffset = <%=mapvalues.offsetX%>;
-var yOffset = <%=mapvalues.offsetY%>;
-var sizeX = <%=mapvalues.sizeW%>;
-var sizeY = <%=mapvalues.sizeH%>;
-var updateEvery = <%=mapvalues.pointIntervalMs%>;
-
-</script>
-<div id="menu">
+<header id="header">
   <div>
     <button type="button" class='btn btn-success action' data-action='api/local/action/start'>Start</button>
     <button type="button" class='btn btn-success action' data-action='api/local/action/pause'>Pause</button>
     <button type="button" class='btn btn-success action' data-action='api/local/action/resume'>Resume</button>
     <button type="button" class='btn btn-success action' data-action='api/local/action/dock'>Dock</button>
     <button type="button" class='btn btn-success action' data-action='api/local/action/stop'>Stop</button>
-    <button type="button" class='btn btn-info action' data-action='api/local/info/sys'>Test Sys</button>
+    <!--button type="button" class='btn btn-info action' data-action='api/local/info/sys'>Test Sys</button-->
+    <button type="button" class='btn btn-info' onclick='center();'>Center</button> 
+    <button type="button" class='btn btn-info' onclick='fit();'>Auto Fit</button> 
     <a type="button" class='btn btn-warning' id='download' onclick='downloadCanvas();'>Download Image</a>
-    <a type="button" class='btn btn-warning' id='downloadData' onclick='downloadSteps();'>Download Data</a>
+    <!-- Trigger the modal with a button -->
+    <button type="button" class='btn btn-danger' onclick='loadMapList();' data-toggle="modal" data-target="#selectMapModal">Select map</button>
     <button type="button" class='btn btn-danger' onclick='clearMap();'>Clear map</button>
     <button type="button" class='btn btn-danger' onclick='replay();'>Replay</button> 
-    <button type="button" class='btn btn-danger' id='start' style='display:none' onclick='toggleMapping(true);'>Start mapping</button> 
+    <button type="button" class='btn btn-danger' id='start' onclick='toggleMapping(true);'>Start live</button> 
     <button type="button" class='btn btn-danger' id='stop' onclick='toggleMapping(false);'>Stop mapping</button> 
   </div>
-  <div>
-    Update every: <input type='text' id='updateevery' size='5' value=''/>ms.
-    Canvas size: w:<input type='text' class='metrics' id='sizew' size='5' value='' disabled/> h:<input class='metrics' type='text' id='sizeh' size='5' value='' disabled/>
-    Zoom: <input type='text' class='metrics' id='zoom' size='5' value='' disabled/>
-    Offsets: x:<input type='text' class='metrics' id='offsetx' size='5' value='' disabled/> y:<input class='metrics' type='text' id='offsety' size='5' value='' disabled/>
-    <button type="button" onclick='center();'>Center</button>
-    <button type="button" onclick='fit();'>Auto Fit</button>
-  </div>
-
   <div>Command response: <span id='apiresponse'>ok</span></div>
-  <div>Status: <span class='' id='mapStatus' style='white-space:nowrap;'></span></div>
+  <div hidden>Status: <span class='' id='mapStatus' style='white-space:nowrap;'></span></div>
+</header>
+
+<!-- Modal -->
+<div id="selectMapModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Select Map</h4>
+      </div>
+      <div class="modal-body">
+        <table id="maps_table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Mission</th>
+                    <th>Steps</th>
+                </tr>
+            </thead>
+            <tbody class="table">
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+        <button type="button" id="ok_map_table" class="btn btn-default" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+
 <div id="map" style="position: relative; width=100%;">
   <canvas id="path_layer"  style="position: absolute; left: 0; top: 0; z-index: 0; border:1px solid #d3d3d3;"></canvas>
   <canvas id="robot_body_layer" style="position: absolute; left: 0; top: 0; z-index: 1; border:1px solid #d3d3d3;"></canvas>
@@ -62,9 +80,65 @@ var updateEvery = <%=mapvalues.pointIntervalMs%>;
     <tr><td>y:</td><td class='data'><span id='y'></span></td></tr>
     <tr><td>&nbsp;</td><td></td></tr>
     <tr><td>steps:</td><td class='data'><span id='steps'></span></td></tr>
+    <tr><td>zoom:</td><td class='data'><span id='zoom'></span></td></tr>
+    <tr><td>map:</td><td class='data'><span id='map_name'></span></td></tr>
   </table>
 </div>
 
 <script src="<%=rootPath%>/js/map.js"></script>
 
+<script>
+
+$.fn.dataTable.ext.errMode = 'throw';
+var mapTable = $('#maps_table').DataTable({
+	"columns": [
+	  { data: "name" },
+	  { data: "steps" }
+	],
+	"order": [[ 0, "desc" ]]	
+});
+			    
+$('#maps_table tbody').on( 'click', 'tr', function () {
+    if ( $(this).hasClass('selected') ) {
+        $(this).removeClass('selected');
+        $('#ok_map_table').prop("disabled",true);
+    }
+    else {
+        mapTable.$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
+        $('#ok_map_table').prop("disabled",false);
+    }
+});
+
+$('#maps_table tbody').on( 'dblclick', 'tr', function () {
+  $('#selectMapModal').modal('hide');
+  mapSelected(mapTable.row( this ).data());
+});
+
+$('#ok_map_table').click( function () {
+    var r = mapTable.row('.selected');
+    if (r) {
+      mapSelected(r.data());
+    }
+});
+
+function loadMapList() {
+    $('#ok_map_table').prop("disabled",true);
+    $('#maps_table .selected').removeClass('selected');
+
+    mapTable.clear();
+    mapTable.draw();        
+
+    loadMissions(function (data) {
+        var maps=data;
+
+        maps.forEach( (map) => {
+            mapTable.row.add({id: map.name, url: map.url, name: map.name, steps: map.steps});
+        });
+        
+        mapTable.draw();        
+    });
+}
+
+</script>
 <% include footer.ejs %>

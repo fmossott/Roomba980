@@ -7,11 +7,9 @@ var dorita980 = require('dorita980');
 var fs = require('fs');
 var path = require('path');
 
-
 var blid = process.env.BLID || config.blid;
 var password = process.env.PASSWORD || config.password;
 var robotIP = process.env.ROBOT_IP || config.robotIP;
-var knownIP = robotIP;
 var firmwareVersion = parseInt((process.env.FIRMWARE_VERSION || config.firmwareVersion || 1), 10);
 var enableLocal = process.env.ENABLE_LOCAL || config.enableLocal || 'yes';
 var enableCloud = process.env.ENABLE_CLOUD || config.enableCloud || 'yes';
@@ -33,7 +31,6 @@ router.get('/', function (req, res) {
     version: '1.0.' + firmwareVersion}
   );
 });
-
 
 // LOCAL:
 
@@ -140,7 +137,7 @@ function map2dorita (source, method, hasArgs) {
 }
 
 function sendAndDisconnect (method, args, res, next) {
-  let client = new dorita980.Local(blid, password, knownIP, 2);
+  let client = new dorita980.Local(blid, password, myRobot.knownIP, 2);
   client.on('connect', function () {
     client[method](args).then(function (resp) {
       res.send(resp);
@@ -149,7 +146,7 @@ function sendAndDisconnect (method, args, res, next) {
   });
 }
 
-module.exports = (robot) => { 
-  myRobot=robot;
+module.exports = function (robot) {
+  myRobot = robot;
   return router;
-}
+};
