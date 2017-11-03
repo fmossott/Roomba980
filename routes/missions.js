@@ -6,7 +6,7 @@ var router = express.Router();
 var fs = require('fs');
 
 var jsonfile = require('jsonfile');
-var statusPath = './config/status.json';
+var statusPath = './missions/status.json';
 
 var missionsPath = path.join(__dirname, '../missions');
 
