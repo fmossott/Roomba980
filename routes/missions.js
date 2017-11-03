@@ -102,7 +102,7 @@ var wsSet = new Set();
 router.ws('/status', function (ws, req) {
   preparews(ws);
   ws.mapEventFilter = function (obj) {
-    if (obj && (obj.pose || obj.cleanMissionStatus || obj.batPct || obj.bin)) {
+    if (obj && (obj.cleanMissionStatus || obj.batPct || obj.bin)) {
       return obj;
     } else {
       return null;

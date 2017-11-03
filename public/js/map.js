@@ -505,7 +505,7 @@ function handleEvent (msg) {
     if (mapChangeStatus) mapChangeStatus.phase(msg.cleanMissionStatus.phase, msg.cleanMissionStatus.cycle);
   }
 
-  if (msg.pose) {
+  if (msg.pose && mapping) {
     // {"pose":{"theta":-4,"point":{"x":36,"y":1}}}
     $('#theta').html(msg.pose.theta);
     $('#x').html(msg.pose.point.x);
