@@ -52,7 +52,7 @@ omit `DEBUG=rest980:*` if you want. You can just run with `npm start`
 
 You can use [fmossott/rest980](https://hub.docker.com/r/fmossott/rest980/) docker image to run this server in a docker container.
 
-Pull Docker image:
+Pull Docker image (optional):
 ```bash
 docker pull fmossott/rest980
 ```
@@ -60,6 +60,33 @@ docker pull fmossott/rest980
 Run Docker image:
 ```
 docker run -p 3000:3000 -v roomba:/usr/src/app/missions -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP -e ROOT_PATH=/roomba fmossott/rest980
+```
+Or run with docker-compose:
+
+* create a docker-compose.yml with a contente similar to the following one:
+```
+version: '2'
+services:
+  roomba-map:
+    image: fmossott/rest980
+    environment:
+    - BLID=.... 
+    - PASSWORD=.... 
+    - ROBOT_IP=....
+    - ROOT_PATH=/roomba
+    ports:
+    - "3000:3000"
+    restart: always
+    volumes:
+    - roomba:/usr/src/app/missions
+
+volumes:
+  roomba:
+```
+
+* and start the container running
+```
+docker-compose up --remove-orphans -d
 ```
 
 ## Dockerfile
@@ -275,5 +302,4 @@ Map actions
 
 Map selection list
 ![/maplist](https://github.com/fmossott/rest980/blob/master/doc/Roomba%20Map%20-%20Map%20List.png)
-
 
