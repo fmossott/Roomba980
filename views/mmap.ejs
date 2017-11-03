@@ -60,6 +60,7 @@
       <span class="mdc-toolbar__title map-sub-title"></span>
     </section>
     <section class="mdc-toolbar__section mdc-toolbar__section--align-end mdc-toolbar__section--shrink-to-fit">
+      <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_warning"><i class="material-icons">warning</i></span>
       <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_binfull"><i class="material-icons">delete</i></span>
       <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_binmissing"><i class="material-icons">delete_forever</i></span>
       <span class="mdc-toolbar__icon map-hidden map-icon-no-pointer" id="map_icon_mission"><i class="material-icons">play_circle_filled</i></span>
@@ -227,6 +228,8 @@
   var mapChangeStatus = {
     phase: function(phase, cycle) {
       if (phase) {
+        $('#map_icon_warning').addClass('map-hidden');
+        
         // Main FAB:
         if (['run','hmMidMsn','hmPostMsn', 'hmUsrDock'].indexOf(phase) > -1) {
           // Main FAB is Pause
@@ -272,6 +275,12 @@
     bin: function(present, full) {
       $('#map_icon_binfull').toggleClass('map-hidden', !full);
       $('#map_icon_binmissing').toggleClass('map-hidden', present);
+    },
+
+    disconnected: function(present, full) {
+      $('.mdc-fab').addClass('mdc-fab--exited');
+      $('.mdc-toolbar__icon').addClass('map-hidden');
+      $('#map_icon_warning').removeClass('map-hidden');
     }
   }
 

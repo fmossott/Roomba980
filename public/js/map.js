@@ -564,6 +564,7 @@ function openWs (load, statusOnly) {
 
   webSocket.onclose = function (event) {
     console.log('ws closed: code=' + event.code);
+    if (mapChangeStatus) mapChangeStatus.disconnected();
     if (!webSocket.closed) {
       setTimeout(function () {
         openWs(false, statusOnly);
