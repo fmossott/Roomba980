@@ -59,7 +59,7 @@ docker pull fmossott/rest980
 
 Run Docker image:
 ```
-docker run -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP -e ROOT_PATH=roomba fmossott/rest980
+docker run -p 3000:3000 -v roomba:/usr/src/app/missions -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP -e ROOT_PATH=/roomba fmossott/rest980
 ```
 
 ## Dockerfile
