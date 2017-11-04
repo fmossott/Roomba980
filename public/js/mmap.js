@@ -62,7 +62,7 @@ $('.map-sub-header').hide();
 // Drawer actions
 $('#menu-select-map').click(function () {
   drawer.open = false;
-  roombaMap.loadMapList();
+  loadMapList();
   return false;
 });
 
