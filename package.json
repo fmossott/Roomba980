@@ -20,7 +20,7 @@
     "@material/fab": "^0.24.0",
     "@material/list": "^0.24.0",
     "@material/toolbar": "^0.24.0",
-    "basic-auth": "1.1.0",
+    "basic-auth": "2.0.0",
     "body-parser": "^1.16.0",
     "config": "^1.21.0",
     "cookie-parser": "^1.4.3",
@@ -32,7 +32,7 @@
     "jsonfile": "^4.0.0",
     "material-components-web": "^0.24.0",
     "morgan": "^1.7.0",
-    "ws": "^3.2.0"
+    "ws": "^3.3.0"
   },
   "devDependencies": {
     "semistandard": "^9.1.0",
