@@ -127,7 +127,7 @@ function showResult (res) {
 
   if (typeof res.ok !== 'undefined') {
     data.message = 'OK';
-  } else {
+  } else if (typeof res.message !== 'undefined') {
     data.message = res.message;
     console.log(JSON.stringify(res));
   }
