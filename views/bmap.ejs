@@ -7,15 +7,15 @@
     <button type="button" class='btn btn-success action' data-action='api/local/action/dock'>Dock</button>
     <button type="button" class='btn btn-success action' data-action='api/local/action/stop'>Stop</button>
     <!--button type="button" class='btn btn-info action' data-action='api/local/info/sys'>Test Sys</button-->
-    <button type="button" class='btn btn-info' onclick='center();'>Center</button> 
-    <button type="button" class='btn btn-info' onclick='fit();'>Auto Fit</button> 
-    <a type="button" class='btn btn-warning' id='download' onclick='downloadCanvas();'>Download Image</a>
+    <button type="button" class='btn btn-info' id='menu-center'>Center</button> 
+    <button type="button" class='btn btn-info' id='menu-fit'>Auto Fit</button> 
+    <a type="button" class='btn btn-warning' id='menu-download'>Download Image</a>
     <!-- Trigger the modal with a button -->
-    <button type="button" class='btn btn-danger' onclick='loadMapList();' data-toggle="modal" data-target="#selectMapModal">Select map</button>
-    <button type="button" class='btn btn-danger' onclick='clearMap();'>Clear map</button>
-    <button type="button" class='btn btn-danger' onclick='replay();'>Replay</button> 
-    <button type="button" class='btn btn-danger' id='start' onclick='toggleMapping(true);'>Start live</button> 
-    <button type="button" class='btn btn-danger' id='stop' onclick='toggleMapping(false);'>Stop mapping</button> 
+    <button type="button" class='btn btn-danger' id='menu-select-map'data-toggle="modal" data-target="#selectMapModal">Select map</button>
+    <button type="button" class='btn btn-danger' id='menu-clear-map'>Clear map</button>
+    <button type="button" class='btn btn-danger' id='menu-replay'>Replay</button> 
+    <button type="button" class='btn btn-danger' id='menu-start-mapping'>Start live</button> 
+    <button type="button" class='btn btn-danger' id='menu-stop-mapping'>Stop mapping</button> 
   </div>
   <div>Command response: <span id='apiresponse'>ok</span></div>
   <div hidden>Status: <span class='' id='mapStatus' style='white-space:nowrap;'></span></div>
@@ -87,58 +87,6 @@
 
 <script src="<%=rootPath%>/js/map.js"></script>
 
-<script>
+<script src="<%=rootPath%>/js/bmap.js"></script>
 
-$.fn.dataTable.ext.errMode = 'throw';
-var mapTable = $('#maps_table').DataTable({
-	"columns": [
-	  { data: "name" },
-	  { data: "steps" }
-	],
-	"order": [[ 0, "desc" ]]	
-});
-			    
-$('#maps_table tbody').on( 'click', 'tr', function () {
-    if ( $(this).hasClass('selected') ) {
-        $(this).removeClass('selected');
-        $('#ok_map_table').prop("disabled",true);
-    }
-    else {
-        mapTable.$('tr.selected').removeClass('selected');
-        $(this).addClass('selected');
-        $('#ok_map_table').prop("disabled",false);
-    }
-});
-
-$('#maps_table tbody').on( 'dblclick', 'tr', function () {
-  $('#selectMapModal').modal('hide');
-  mapSelected(mapTable.row( this ).data());
-});
-
-$('#ok_map_table').click( function () {
-    var r = mapTable.row('.selected');
-    if (r) {
-      mapSelected(r.data());
-    }
-});
-
-function loadMapList() {
-    $('#ok_map_table').prop("disabled",true);
-    $('#maps_table .selected').removeClass('selected');
-
-    mapTable.clear();
-    mapTable.draw();        
-
-    loadMissions(function (data) {
-        var maps=data;
-
-        maps.forEach( (map) => {
-            mapTable.row.add({id: map.name, url: map.url, name: map.name, steps: map.steps});
-        });
-        
-        mapTable.draw();        
-    });
-}
-
-</script>
 <% include footer.ejs %>

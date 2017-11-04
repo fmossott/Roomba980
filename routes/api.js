@@ -4,18 +4,14 @@ var express = require('express');
 var router = express.Router();
 var config = require('config');
 var dorita980 = require('dorita980');
-var fs = require('fs');
 var path = require('path');
 
 var blid = process.env.BLID || config.blid;
 var password = process.env.PASSWORD || config.password;
-var robotIP = process.env.ROBOT_IP || config.robotIP;
 var firmwareVersion = parseInt((process.env.FIRMWARE_VERSION || config.firmwareVersion || 1), 10);
 var enableLocal = process.env.ENABLE_LOCAL || config.enableLocal || 'yes';
 var enableCloud = process.env.ENABLE_CLOUD || config.enableCloud || 'yes';
 var keepAlive = process.env.KEEP_ALIVE || config.keepAlive || 'yes';
-
-var missionsPath = path.join(__dirname, '../missions');
 
 // Temporal:
 if (firmwareVersion === 2) enableCloud = 'no';

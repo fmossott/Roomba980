@@ -79,19 +79,19 @@
     </header>
     <nav class="mdc-temporary-drawer__content mdc-list-group">
       <div class="mdc-list">
-        <a class="mdc-list-item mdc-temporary-drawer--selected" onclick='drawer.open = false; loadMapList();'>
+        <a class="mdc-list-item mdc-temporary-drawer--selected" id='menu-select-map'>
           <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">list</i>Select map
         </a>
-        <a class="mdc-list-item" onclick='drawer.open = false; clearMap();'>
+        <a class="mdc-list-item" id='menu-clear-map'>
           <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">clear</i>Clear map
         </a>
-        <a class="mdc-list-item" onclick='drawer.open = false; replay();'>
+        <a class="mdc-list-item" id='menu-replay'>
           <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">replay</i>Replay
         </a>
-        <a class="mdc-list-item" id='start' onclick='drawer.open = false; toggleMapping(true);'>
+        <a class="mdc-list-item" id='menu-start-mapping'>
           <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">play_arrow</i>Start live
         </a>
-        <a class="mdc-list-item" id='stop' onclick='drawer.open = false; toggleMapping(false);'>
+        <a class="mdc-list-item" id='menu-stop-mapping'>
           <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">stop</i>Stop mapping
         </a>
       </div>
@@ -99,7 +99,7 @@
       <hr class="mdc-list-divider">
 
       <div class="mdc-list">
-        <a class="mdc-list-item" id='download' onclick='downloadCanvas();'>
+        <a class="mdc-list-item" id='download'>
           <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">file_download</i>Download Image
         </a>
       </div>
@@ -138,217 +138,6 @@
 
 <script src="material-components-web/dist/material-components-web.js"></script>
 
-<script>
-  // Drawer
-  var drawerEl = document.querySelector('.mdc-temporary-drawer');
-  var MDCTemporaryDrawer = mdc.drawer.MDCTemporaryDrawer;
-  var drawer = new MDCTemporaryDrawer(drawerEl);
-
-  drawerEl.addEventListener('MDCTemporaryDrawer:open', function() {
-    console.log('Received MDCTemporaryDrawer:open');
-  });
-  drawerEl.addEventListener('MDCTemporaryDrawer:close', function() {
-    console.log('Received MDCTemporaryDrawer:close');
-  });
-  
-  $('.map-menu').click( () => {
-    drawer.open = true;
-    return false;
-  });
-
-  // Navigation
-  $('.map-back').click( () => {
-    history.back();
-    return false;
-  });
-
-  function showHome() {
-    $('.map-home-page').show();
-    $('.map-sub-page').hide();
-    $('.map-home-header').show();
-    $('.map-sub-header').hide();
-    mainFabPath=null;
-  }
-  
-  function openSubMap(title) {
-    drawer.open = false;
-    $('.map-sub-title').html(title);
-    $('.map-sub-page').hide();
-    $('.map-home-page').show();
-    $('.map-home-header').hide();
-    $('.map-sub-header').show();
-    mapChangeStatus.phase();
-  }  
-
-  function openSub(subSel, title) {
-    drawer.open = false;
-    $('.map-sub-title').html(title);
-    $('.map-home-page').hide();
-    $(subSel).show();
-    $('.map-home-header').hide();
-    $('.map-sub-header').show();
-    mapChangeStatus.phase();
-  }  
-
-  // Hide at startup
-  $('.map-sub-page').hide();
-  $('.map-sub-header').hide();
-  
-  // FAB & Toolbar icons
-  
-  var mainFabPath;
-
-  $('.map-main-fab').click(function() {
-    if (mainFabPath) doAction(mainFabPath,showResult);
-    return false;
-  })
-  
-  $('#sec-fab-stop').click(function() {
-    doAction('api/local/action/stop',showResult);
-    return false;
-  })
-  
-  $('#sec-fab-dock').click(function() {
-    doAction('api/local/action/dock',showResult);
-    return false;
-  })
-  
-  var snackbar = new mdc.snackbar.MDCSnackbar($('#map-snackbar')[0]);
-
-  function showResult(res) {
-    snackbar.dismissesOnAction = true;
-    var data =  {
-      message: JSON.stringify(res),
-      timeout: 1000
-    };
-
-    snackbar.show(data);
-  };
-  
-  var mapChangeStatus = {
-    phase: function(phase, cycle) {
-      if (phase) {
-        $('#map_icon_warning').addClass('map-hidden');
-        
-        // Main FAB:
-        if (['run','hmMidMsn','hmPostMsn', 'hmUsrDock'].indexOf(phase) > -1) {
-          // Main FAB is Pause
-          mainFabPath='api/local/action/pause';
-          $('#main-fab-play').addClass('mdc-fab--exited');
-          $('#main-fab-pause').removeClass('mdc-fab--exited');
-        } else {
-          if (cycle === 'none') {
-            // Main FAB is Start
-            console.log('Main FAB is Start');
-            mainFabPath='api/local/action/start';
-          } else {
-            // Main FAB is Resume
-            console.log('Main FAB is Resume');
-            mainFabPath='api/local/action/resume';
-          }
-          $('#main-fab-pause').addClass('mdc-fab--exited');
-          $('#main-fab-play').removeClass('mdc-fab--exited');
-        }
-        
-        // Dock FAB if phase is not hmMidMsn, hmPostMsn, hmUsrDock, charge
-        var dockEnabled = (['charge','hmMidMsn','hmPostMsn', 'hmUsrDock'].indexOf(phase) <= -1);
-        $('#sec-fab-dock').toggleClass('mdc-fab--exited',!dockEnabled);
-        $('#map_icon_dock').toggleClass('map-hidden',dockEnabled);
-        
-        // Stop FAB is cycle is not none
-        var hasMission=(cycle != 'none');
-        $('#sec-fab-stop').toggleClass('mdc-fab--exited',!hasMission);
-        $('#map_icon_mission').toggleClass('map-hidden',!hasMission);
-        
-        var charging=(phase === 'charge');
-        $('#map_icon_battery_charging').toggleClass('map-hidden',!charging);
-        $('#map_icon_battery_std').toggleClass('map-hidden',charging);
-        
-      }
-    },
-
-    batPct: function(bat) {
-      $('#map_icon_battery').removeClass('map-hidden');
-      $('#map_icon_battery_qty').text(bat);
-    },
-
-    bin: function(present, full) {
-      $('#map_icon_binfull').toggleClass('map-hidden', !full);
-      $('#map_icon_binmissing').toggleClass('map-hidden', present);
-    },
-
-    disconnected: function(present, full) {
-      $('.mdc-fab').addClass('mdc-fab--exited');
-      $('.mdc-toolbar__icon').addClass('map-hidden');
-      $('#map_icon_warning').removeClass('map-hidden');
-    }
-  }
-
-  // Map Selection
-  function loadMapList() {
-    var list=$('#map_selection_list');
-    list.html("");
-
-    loadMissions(function (data) {
-      var maps=data.sort().reverse();
-
-      maps.forEach( (map) => {
-        if (map.name != 'current') {
-          var li = $('<a>').attr('href','#').addClass("mdc-list-item")
-            .append($('<i>').addClass("mdc-list-item__start-detail material-icons").attr("aria-hidden","true").html("map"))
-            .append($('<span>').addClass("mdc-list-item__text").attr("aria-hidden","true").html(map.name)
-              .append($('<span>').addClass("mdc-list-item__text__secondary").html(map.steps+' steps'))
-            );
-
-          li.data('map',map);
-          list.append(li);
-        }
-      });
-    });
-
-    openSub('#maplist','Map Selection');
-  }
-  
-  $('#map_selection_list').on( 'click', '.mdc-list-item', function () {
-    var ripple = new mdc.ripple.MDCRipple(this);
-    ripple.activate();
-    
-    var map=$(this).data('map');
-
-    history.pushState(map, map.name);
-
-    setTimeout(function (){openMap(map)}, 100);
-    return false;
-  });  
-  
-  function openMap(map) {
-    openSubMap('Roomba Map: '+map.name);
-    mapSelected(map);  
-  }
-  
-  // History
-  
-  var currentState = history.state;
-  
-  mapOnStart = function() {
-    posState({ state: currentState });
-  }
-  
-  function posState(event) {
-    console.log('location: ' + document.location + ', state: ' + JSON.stringify(event.state));
-    if (event.state) {
-      openMap(event.state);
-    } else {
-      toggleMapping(true);
-      showHome();
-    }
-  }
-  
-  window.onpopstate = posState;
-
-</script>
-
-<script>mdc.autoInit()</script>
-
+<script src="<%=rootPath%>/js/mmap.js"></script>
 
 <% include mfooter.ejs %>
