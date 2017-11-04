@@ -70,9 +70,9 @@ services:
   roomba-map:
     image: fmossott/rest980
     environment:
-    - BLID=.... 
-    - PASSWORD=.... 
-    - ROBOT_IP=....
+    - BLID=myuser
+    - PASSWORD=mypass
+    - ROBOT_IP=myrobotIP
     - ROOT_PATH=/roomba
     ports:
     - "3000:3000"
