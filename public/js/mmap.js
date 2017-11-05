@@ -220,6 +220,8 @@ function loadMapList () {
     });
   });
 
+  history.pushState('map-selection', 'Map Selection');
+
   openSub('#maplist', 'Map Selection');
 }
 
@@ -247,7 +249,11 @@ var currentState = history.state;
 function posState (event) {
   console.log('location: ' + document.location + ', state: ' + JSON.stringify(event.state));
   if (event.state) {
-    openMap(event.state);
+    if (event.state === 'map-selection') {
+      history.back();
+    } else {
+      openMap(event.state);
+    }
   } else {
     roombaMap.toggleMapping(true);
     showHome();

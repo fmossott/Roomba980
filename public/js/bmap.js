@@ -69,15 +69,15 @@ $('.action').on('click', function () {
 
 var mapChangeStatus = {
   updateMission: function (mission) {
-    $('#cycle').html(mission ? mission.cycle : "");
-    $('#phase').html(mission ? mission.phase : "");
-    $('#expireM').html(mission ? mission.expireM : "");
-    $('#rechrgM').html(mission ? mission.rechrgM : "");
-    $('#error').html(mission ? mission.error : "");
-    $('#notReady').html(mission ? mission.notReady : "");
-    $('#mission').html(mission ? mission.mssnM : "");
-    $('#sqft').html(mission ? mission.sqft : "");
-    $('#nMssn').html(mission ? mission.nMssn : "");
+    $('#cycle').html(mission ? mission.cycle : '');
+    $('#phase').html(mission ? mission.phase : '');
+    $('#expireM').html(mission ? mission.expireM : '');
+    $('#rechrgM').html(mission ? mission.rechrgM : '');
+    $('#error').html(mission ? mission.error : '');
+    $('#notReady').html(mission ? mission.notReady : '');
+    $('#mission').html(mission ? mission.mssnM : '');
+    $('#sqft').html(mission ? mission.sqft : '');
+    $('#nMssn').html(mission ? mission.nMssn : '');
     $('#mapStatus').html('');
   },
 
