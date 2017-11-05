@@ -69,15 +69,15 @@ $('.action').on('click', function () {
 
 var mapChangeStatus = {
   updateMission: function (mission) {
-    $('#cycle').html(mission.cycle);
-    $('#phase').html(mission.phase);
-    $('#expireM').html(mission.expireM);
-    $('#rechrgM').html(mission.rechrgM);
-    $('#error').html(mission.error);
-    $('#notReady').html(mission.notReady);
-    $('#mission').html(mission.mssnM);
-    $('#sqft').html(mission.sqft);
-    $('#nMssn').html(mission.nMssn);
+    $('#cycle').html(mission ? mission.cycle : "");
+    $('#phase').html(mission ? mission.phase : "");
+    $('#expireM').html(mission ? mission.expireM : "");
+    $('#rechrgM').html(mission ? mission.rechrgM : "");
+    $('#error').html(mission ? mission.error : "");
+    $('#notReady').html(mission ? mission.notReady : "");
+    $('#mission').html(mission ? mission.mssnM : "");
+    $('#sqft').html(mission ? mission.sqft : "");
+    $('#nMssn').html(mission ? mission.nMssn : "");
     $('#mapStatus').html('');
   },
 
@@ -110,7 +110,7 @@ var mapChangeStatus = {
     $('#full').html(full);
   },
 
-  upadateMapping: function (mapping) {
+  updateMapping: function (mapping) {
     $('#menu-start-mapping').toggle(!mapping);
     $('#menu-stop-mapping').toggle(mapping);
   }
@@ -128,12 +128,10 @@ $('#menu-fit').click(function () {
 
 $('#menu-download').click(function () {
   roombaMap.downloadCanvas();
-  return false;
 });
 
 $('#menu-select-map').click(function () {
   loadMapList();
-  return false;
 });
 
 $('#menu-clear-map').click(function () {

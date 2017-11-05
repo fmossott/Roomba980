@@ -42,7 +42,6 @@ function openSubMap (title) {
   $('.map-home-page').show();
   $('.map-home-header').hide();
   $('.map-sub-header').show();
-  mapChangeStatus.phase();
 }
 
 function openSub (subSel, title) {
@@ -52,7 +51,6 @@ function openSub (subSel, title) {
   $(subSel).show();
   $('.map-home-header').hide();
   $('.map-sub-header').show();
-  mapChangeStatus.phase();
 }
 
 // Hide at startup
@@ -78,22 +76,21 @@ $('#menu-replay').click(function () {
   return false;
 });
 
-$('#start').click(function () {
+$('#menu-start-mapping').click(function () {
   drawer.open = false;
   roombaMap.toggleMapping(true);
   return false;
 });
 
-$('#stop').click(function () {
+$('#menu-stop-mapping').click(function () {
   drawer.open = false;
   roombaMap.toggleMapping(false);
   return false;
 });
 
-$('#menu-select-map').click(function () {
+$('#menu-download').click(function () {
   drawer.open = false;
   roombaMap.downloadCanvas();
-  return false;
 });
 
 // FAB & Toolbar icons
@@ -137,9 +134,10 @@ function showResult (res) {
 
 var mapChangeStatus = {
   updateMission: function (mission) {
-    var phase = mission.phase;
-    var cycle = mission.cycle;
-    if (phase) {
+    if (mission && mission.phase) {
+      var phase = mission.phase;
+      var cycle = mission.cycle;
+
       $('#map_icon_warning').addClass('map-hidden');
 
       // Main FAB:

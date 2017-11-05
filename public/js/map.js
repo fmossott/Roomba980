@@ -387,8 +387,8 @@ function RoombaMap (headerSelector, changeListener) {
     var bodyContext = bodyCanvas.getContext('2d');
     bodyContext.drawImage(pathCanvas, 0, 0);
 
-    document.getElementById('download').href = bodyCanvas.toDataURL();
-    document.getElementById('download').download = 'current_map.png';
+    document.getElementById('menu-download').href = bodyCanvas.toDataURL();
+    document.getElementById('menu-download').download = 'current_map.png';
   }
 
   function downloadSteps () {
