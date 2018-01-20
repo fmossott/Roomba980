@@ -37,7 +37,7 @@ The service can be configured by editing `config/default.json` or by setting env
 
 *For obtaining your robot blid and password run the following command with docker or see [dorita980](https://github.com/koalazak/dorita980) for more information and instructions*
 ```
-docker run -it fmossott/rest980 npm run getpassword 192.168.1.40
+docker run -it fmossott/rest980 npm run getpassword <RoombaIP>
 ```
 
 ## Start API Server
