@@ -35,9 +35,10 @@ The service can be configured by editing `config/default.json` or by setting env
 |rootPath|ROOT_PATH|*(optional)* Set base path of the rest980 urls. This is useful when using a reverse proxy in front shared with other applications.|
 
 
-*See [dorita980](https://github.com/koalazak/dorita980) for more information and instructions for obtaining your robot blid and password*
-
-
+*For obtaining your robot blid and password run the following command with docker or see [dorita980](https://github.com/koalazak/dorita980) for more information and instructions*
+```
+docker run -it fmossott/rest980 npm run getpassword 192.168.1.40
+```
 
 ## Start API Server
 ```
