@@ -1,7 +1,7 @@
 {
-  "name": "rest980",
-  "version": "2.0.6",
-  "description": "dorita980 REST interface to control your iRobot Roomba 980",
+  "name": "Roomba980",
+  "version": "3.0.1",
+  "description": "MAP and REST interface to control your iRobot Roomba 9xx via local server on your lan.",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -12,27 +12,27 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fmossott/rest980.git"
+    "url": "git+https://github.com/fmossott/Roomba980.git"
   },
   "dependencies": {
-    "@material/auto-init": "^0.24.0",
-    "@material/drawer": "^0.24.0",
-    "@material/fab": "^0.24.0",
-    "@material/list": "^0.24.0",
-    "@material/toolbar": "^0.24.0",
-    "basic-auth": "2.0.0",
-    "body-parser": "^1.16.0",
-    "config": "^2.0.1",
+    "@material/auto-init": "^0.41.0",
+    "@material/drawer": "^0.42.0",
+    "@material/fab": "^0.42.0",
+    "@material/list": "^0.42.0",
+    "@material/toolbar": "^0.42.0",
+    "basic-auth": "2.0.1",
+    "body-parser": "^1.18.3",
+    "config": "^3.0.1",
     "cookie-parser": "^1.4.3",
-    "debug": "^3.1.0",
+    "debug": "^4.1.1",
     "dorita980": "^3.0.11",
     "ejs": "^2.5.2",
     "express": "^4.14.0",
     "express-ws": "^3.0.0",
     "jsonfile": "^4.0.0",
     "material-components-web": "^0.24.0",
-    "morgan": "^1.7.0",
-    "ws": "^3.3.0"
+    "morgan": "^1.9.1",
+    "ws": "^6.1.2"
   },
   "devDependencies": {
     "semistandard": "^9.1.0",
@@ -66,7 +66,7 @@
   "author": "fmossott",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fmossott/rest980/issues"
+    "url": "https://github.com/fmossott/Roomba980/issues"
   },
-  "homepage": "https://github.com/fmossott/rest980#readme"
+  "homepage": "https://github.com/fmossott/Roomba980#readme"
 }

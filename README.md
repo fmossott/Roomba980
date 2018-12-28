@@ -1,19 +1,19 @@
-# rest980
-[![Build Status](https://travis-ci.org/fmossott/rest980.svg?branch=master)](https://travis-ci.org/fmossott/rest980)
-[![dependencies Status](https://david-dm.org/fmossott/rest980/status.svg)](https://david-dm.org/fmossott/rest980)
+# Roomba980
+[![Build Status](https://travis-ci.org/fmossott/Roomba980.svg?branch=master)](https://travis-ci.org/fmossott/Roomba980)
+[![dependencies Status](https://david-dm.org/fmossott/Roomba980.svg)](https://david-dm.org/fmossott/Roomba980)
 
-rest980 create a http server to map all [dorita980](https://github.com/fmossott/dorita980) methods in a REST API to control your iRobot Roomba 980 via HTTP requests.
+Roomba980 create a http server to map all [dorita980](https://github.com/fmossott/dorita980) methods in a REST API to control your iRobot Roomba 980 via HTTP requests.
 
 ## Install
 ```bash
-$ git clone https://github.com/fmossott/rest980.git
-$ cd rest980
+$ git clone https://github.com/fmossott/Roomba980.git
+$ cd Roomba980
 $ npm install
 ```
 
 ## Fimrware version
 
-[Check your robot firmware version!](http://homesupport.irobot.com/app/answers/detail/a_id/529) and set your firmware version in `firmwareVersion` rest980 configuration!
+[Check your robot firmware version!](http://homesupport.irobot.com/app/answers/detail/a_id/529) and set your firmware version in `firmwareVersion` Roomba980 configuration!
 
 ## Configuration
 The service can be configured by editing `config/default.json` or by setting environment variables.
@@ -32,35 +32,35 @@ The service can be configured by editing `config/default.json` or by setting env
 |basicAuthPass|BASIC_AUTH_PASS|*(optional)* Set to enable basic auth. Both user and pass must be set.|
 |sslKeyFile|SSL_KEY_FILE|*(optional)* Set path to key file to enable HTTPS. Both key and cert must be set. [(how to create self signed cert)](http://www.akadia.com/services/ssh_test_certificate.html)|
 |sslCertFile|SSL_CERT_FILE|*(optional)* Set path to cert file to enable HTTPS. Both key and cert must be set. [(how to create self signed cert)](http://www.akadia.com/services/ssh_test_certificate.html)|
-|rootPath|ROOT_PATH|*(optional)* Set base path of the rest980 urls. This is useful when using a reverse proxy in front shared with other applications.|
+|rootPath|ROOT_PATH|*(optional)* Set base path of the Roomba980 urls. This is useful when using a reverse proxy in front shared with other applications.|
 
 
 *For obtaining your robot blid and password run the following command with docker or see [dorita980](https://github.com/koalazak/dorita980) for more information and instructions*
 ```
-docker run -it fmossott/rest980 npm run getpassword <RoombaIP>
+docker run -it fmossott/roomba980 npm run getpassword <RoombaIP>
 ```
 
 ## Start API Server
 ```
-$ cd rest980
-$ DEBUG=rest980:* npm start
-rest980:server Listening on port 3000
+$ cd Roomba980
+$ DEBUG=Roomba980:* npm start
+Roomba980:server Listening on port 3000
 ```
 
-omit `DEBUG=rest980:*` if you want. You can just run with `npm start`
+omit `DEBUG=Roomba980:*` if you want. You can just run with `npm start`
 
 ## Or use Docker Image
 
-You can use [fmossott/rest980](https://hub.docker.com/r/fmossott/rest980/) docker image to run this server in a docker container.
+You can use [fmossott/roomba980](https://hub.docker.com/r/fmossott/roomba980/) docker image to run this server in a docker container.
 
 Pull Docker image (optional):
 ```bash
-docker pull fmossott/rest980
+docker pull fmossott/roomba980
 ```
 
 Run Docker image:
 ```
-docker run -p 3000:3000 -v roomba:/usr/src/app/missions -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP -e ROOT_PATH=/roomba fmossott/rest980
+docker run -p 3000:3000 -v roomba:/usr/src/app/missions -e BLID=myuser -e PASSWORD=mypass -e ROBOT_IP=myrobotIP -e ROOT_PATH=/roomba fmossott/roomba980
 ```
 Or run with docker-compose:
 
@@ -69,7 +69,7 @@ Or run with docker-compose:
 version: '2'
 services:
   roomba-map:
-    image: fmossott/rest980
+    image: fmossott/roomba980
     environment:
     - BLID=myuser
     - PASSWORD=mypass
@@ -92,10 +92,10 @@ docker-compose up --remove-orphans -d
 
 ## Dockerfile
 
-Also you can local build and test in Docker from this [Dockerfile](https://github.com/fmossott/rest980/blob/master/Dockerfile)
+Also you can local build and test in Docker from this [Dockerfile](https://github.com/fmossott/Roomba980/blob/master/Dockerfile)
 
 ```
-docker build . -t fmossott/rest980 
+docker build . -t fmossott/roomba980 
 ```
 
 ## API documentation
@@ -296,11 +296,11 @@ You can add images or files to `public/` folder to serve static files.
 
 Visiting  `http://serverIP:3000/map` to monitor your roomba activities in real time and access to previous cleaning missions
 
-![/map](https://raw.githubusercontent.com/fmossott/rest980/master/doc/Roomba%20Map%20-%20Map.png)
+![/map](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map.png)
 
 Map actions
-![/drawer](https://raw.githubusercontent.com/fmossott/rest980/master/doc/Roomba%20Map%20-%20Drawer.png) 
+![/drawer](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Drawer.png) 
 
 Map selection list
-![/maplist](https://github.com/fmossott/rest980/blob/master/doc/Roomba%20Map%20-%20Map%20List.png)
+![/maplist](https://github.com/fmossott/Roomba980/blob/master/doc/Roomba%20Map%20-%20Map%20List.png)
 

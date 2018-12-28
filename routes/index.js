@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var helloResponse = {
-  documentation: 'https://github.com/fmossott/rest980'
+  documentation: 'https://github.com/fmossott/Roomba980'
 };
 
 router.get('/', function (req, res) {

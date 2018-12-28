@@ -1,7 +1,7 @@
 # Use latest node
 FROM node:boron
 
-LABEL repository="https://github.com/fmossott/rest980"
+LABEL repository="https://github.com/fmossott/Roomba980"
 
 # Create app directory
 RUN mkdir -p /usr/src/app
