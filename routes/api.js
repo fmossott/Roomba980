@@ -4,7 +4,6 @@ var express = require('express');
 var router = express.Router();
 var config = require('config');
 var dorita980 = require('dorita980');
-var path = require('path');
 
 var blid = process.env.BLID || config.blid;
 var password = process.env.PASSWORD || config.password;
@@ -24,7 +23,7 @@ var myRobot;
 
 router.get('/', function (req, res) {
   res.send({
-    version: '1.0.' + firmwareVersion}
+    version: '1.0.' + firmwareVersion }
   );
 });
 

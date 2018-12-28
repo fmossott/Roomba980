@@ -161,4 +161,3 @@ window.onload = function () {
   $('#map_name').html('current');
   roombaMap.toggleMapping(true);
 };
-

@@ -253,7 +253,7 @@ function RoombaMap (headerSelector, changeListener) {
 
     // draw changes in status with text.
     if (!replaying && phase !== lastPhase) {
-      phases.push({x, y, phase});
+      phases.push({ x, y, phase });
       drawPhase(x, y, phase);
       lastPhase = phase;
     }
@@ -393,7 +393,7 @@ function RoombaMap (headerSelector, changeListener) {
 
   function downloadSteps () {
     var json = JSON.stringify(steps);
-    var blob = new Blob([json], {type: 'application/json'});
+    var blob = new Blob([json], { type: 'application/json' });
     var url = URL.createObjectURL(blob);
     document.getElementById('downloadData').href = url;
     document.getElementById('downloadData').download = 'current_data.json';
@@ -532,4 +532,3 @@ function RoombaMap (headerSelector, changeListener) {
   this.center = center;
   this.fit = fit;
 }
-

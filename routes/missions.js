@@ -99,7 +99,7 @@ function live (ws) {
 
 var wsSet = new Set();
 
-router.ws('/status', function (ws, req) {
+router.ws('/status', function (ws) {
   preparews(ws);
   ws.mapEventFilter = function (obj) {
     if (obj && (obj.cleanMissionStatus || obj.batPct || obj.bin)) {
@@ -111,12 +111,12 @@ router.ws('/status', function (ws, req) {
   live(ws);
 });
 
-router.ws('/events', function (ws, req) {
+router.ws('/events', function (ws) {
   preparews(ws);
   live(ws);
 });
 
-router.ws('/loadandevents', function (ws, req) {
+router.ws('/loadandevents', function (ws) {
   preparews(ws);
 
   currentLogFile((logfile) => {
@@ -143,7 +143,7 @@ router.ws('/loadandevents', function (ws, req) {
               }
             }
           });
-          ws.send(JSON.stringify({maxX, minX, maxY, minY}));
+          ws.send(JSON.stringify({ maxX, minX, maxY, minY }));
         } catch (e) {
           console.log(e.stack);
         }

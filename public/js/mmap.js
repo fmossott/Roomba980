@@ -270,4 +270,3 @@ window.onload = function () {
 };
 
 mdc.autoInit();
-

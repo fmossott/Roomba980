@@ -5,7 +5,7 @@ var valuesPath = './config/mapvalues.json';
 
 router.get('/', function (req, res) {
   var mapvalues = jsonfile.readFileSync(valuesPath);
-  res.render('bmap', {title: 'Roomba Map', mapvalues: mapvalues, rootPath: '.'});
+  res.render('bmap', { title: 'Roomba Map', mapvalues: mapvalues, rootPath: '.' });
 });
 
 router.post('/values', function (req, res) {
@@ -17,7 +17,7 @@ router.post('/values', function (req, res) {
   mapvalues.sizeH = req.body.sizeH || mapvalues.sizeH;
   mapvalues.pointIntervalMs = req.body.pointIntervalMs || mapvalues.pointIntervalMs;
 
-  jsonfile.writeFileSync(valuesPath, mapvalues, {spaces: 2});
+  jsonfile.writeFileSync(valuesPath, mapvalues, { spaces: 2 });
   res.json(mapvalues);
 });
 
