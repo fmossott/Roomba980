@@ -32,5 +32,9 @@ ENV ROOT_PATH=
 
 EXPOSE ${PORT}
 
+RUN chmod 775 /usr/src/app/missions
+
+USER 2000
+
 # Start the REST interface!
 CMD [ "npm", "start" ]
