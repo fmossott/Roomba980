@@ -32,7 +32,9 @@ ENV ROOT_PATH=
 
 EXPOSE ${PORT}
 
-RUN chmod 775 /usr/src/app/missions
+RUN adduser --uid 2000 --gid 0 --disabled-password --gecos '' roomba
+RUN chown -R roomba /usr/src/app/missions
+USER roomba
 
 USER 2000
 
