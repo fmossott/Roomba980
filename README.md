@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/fmossott/Roomba980.svg?branch=master)](https://travis-ci.org/fmossott/Roomba980)
 [![dependencies Status](https://david-dm.org/fmossott/Roomba980.svg)](https://david-dm.org/fmossott/Roomba980)
 
-Roomba980 create a http server to map all [dorita980](https://github.com/fmossott/dorita980) methods in a REST API to control your iRobot Roomba 980 via HTTP requests.
+Roomba980 create a http server to map all [dorita980](https://github.com/koalazak/dorita980) methods in a REST API to control your iRobot Roomba 980 via HTTP requests.
 
 ## Install
 ```bash
