@@ -13,10 +13,12 @@ function RoombaMap (headerSelector, changeListener) {
   var sizeY;
 
   var pathLayerContext;
+  var areaLayerContext;
   var robotBodyLayerContext;
   var textLayerContext;
 
   var pathLayer;
+  var areaLayer;
   var robotBodyLayer;
   var textLayer;
 
@@ -152,6 +154,9 @@ function RoombaMap (headerSelector, changeListener) {
     pathLayer.width = sizeX;
     pathLayer.height = sizeY;
 
+    areaLayer.width = sizeX;
+    areaLayer.height = sizeY;
+
     robotBodyLayer.width = sizeX;
     robotBodyLayer.height = sizeY;
 
@@ -159,14 +164,17 @@ function RoombaMap (headerSelector, changeListener) {
     textLayer.height = sizeY;
 
     pathLayerContext.scale(zoom, zoom);
+    areaLayerContext.scale(zoom, zoom);
     robotBodyLayerContext.scale(zoom, zoom);
     textLayerContext.scale(zoom, zoom);
 
     pathLayerContext.translate(-xOffset, yOffset);
+    areaLayerContext.translate(-xOffset, yOffset);
     robotBodyLayerContext.translate(-xOffset, yOffset);
     textLayerContext.translate(-xOffset, yOffset);
 
     pathLayerContext.beginPath();
+    areaLayerContext.beginPath();
   }
 
   function loadCurrent () {
@@ -202,19 +210,19 @@ function RoombaMap (headerSelector, changeListener) {
 
   function init () {
     pathLayer = document.getElementById('path_layer');
+    areaLayer = document.getElementById('area_layer');
     robotBodyLayer = document.getElementById('robot_body_layer');
     textLayer = document.getElementById('text_layer');
 
     updateViewInfo();
 
     pathLayerContext = pathLayer.getContext('2d');
+    areaLayerContext = areaLayer.getContext('2d');
     robotBodyLayerContext = robotBodyLayer.getContext('2d');
     textLayerContext = textLayer.getContext('2d');
 
     pathLayerContext.beginPath();
-    pathLayerContext.lineWidth = 1;
-    pathLayerContext.strokeStyle = '#000000';
-    pathLayerContext.lineCap = 'round';
+    areaLayerContext.beginPath();
 
     resizeCanvas();
   }
@@ -228,9 +236,21 @@ function RoombaMap (headerSelector, changeListener) {
 
   function drawSegment (x, y, stroke) {
     x = sizeX / zoom - x;
+    pathLayerContext.strokeStyle = '#000000';
+    pathLayerContext.lineWidth = 1;
+    pathLayerContext.lineCap = 'round';
+    
+    areaLayerContext.lineWidth = 20;
+    areaLayerContext.strokeStyle = '#808080';
+    areaLayerContext.lineCap = 'round';
+    areaLayerContext.lineJoin = 'round';
+    
     pathLayerContext.lineTo(x, y);
+    areaLayerContext.lineTo(x, y);
+    
     if (stroke) {
       pathLayerContext.stroke();
+      areaLayerContext.stroke();
     }
   }
 
@@ -310,6 +330,7 @@ function RoombaMap (headerSelector, changeListener) {
         drawSegment(step.point.x, step.point.y, false);
       }
       pathLayerContext.stroke();
+      areaLayerContext.stroke();
       replayStep += i;
       setTimeout(doReplay, 0);
     } else {
@@ -383,8 +404,10 @@ function RoombaMap (headerSelector, changeListener) {
   function downloadCanvas () {
     var bodyCanvas = document.getElementById('robot_body_layer');
     var pathCanvas = document.getElementById('path_layer');
+    var areaCanvas = document.getElementById('area_layer');
 
     var bodyContext = bodyCanvas.getContext('2d');
+    bodyContext.drawImage(areaCanvas, 0, 0);
     bodyContext.drawImage(pathCanvas, 0, 0);
 
     document.getElementById('menu-download').href = bodyCanvas.toDataURL();
