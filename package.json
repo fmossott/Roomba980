@@ -15,10 +15,11 @@
     "url": "git+https://github.com/fmossott/Roomba980.git"
   },
   "dependencies": {
-    "@material/auto-init": "^9.0.0",
-    "@material/drawer": "^9.0.0",
-    "@material/fab": "^9.0.0",
-    "@material/list": "^9.0.0",
+    "material-components-web": "^0.24.0",
+    "@material/auto-init": "^0.24.0",
+    "@material/drawer": "^0.24.0",
+    "@material/fab": "^0.24.0",
+    "@material/list": "^0.24.0",
     "@material/toolbar": "^2.3.0",
     "basic-auth": "2.0.1",
     "body-parser": "^1.19.0",
@@ -30,7 +31,6 @@
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "jsonfile": "^5.0.0",
-    "material-components-web": "^0.24.0",
     "morgan": "^1.10.0",
     "ws": "^6.2.1"
   },
