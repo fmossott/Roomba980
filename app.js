@@ -1,43 +1,43 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 
-var basicAuth = require('basic-auth');
-var config = require('config');
+const basicAuth = require('basic-auth');
+const config = require('config');
 
-var robot = require('./lib/robot');
+const robot = require('./lib/robot');
 
-var helloRoute = require('./routes/index');
-var apiRoute = require('./routes/api')(robot);
-var bmapRoute = require('./routes/bmap');
-var mmapRoute = require('./routes/mmap');
-var missionsRoute = require('./routes/missions')(robot);
+const helloRoute = require('./routes/index');
+const apiRoute = require('./routes/api')(robot);
+const bmapRoute = require('./routes/bmap');
+const mmapRoute = require('./routes/mmap');
+const missionsRoute = require('./routes/missions')(robot);
 
-var rootPath = process.env.ROOT_PATH || config.rootPath || '';
+const rootPath = process.env.ROOT_PATH || config.rootPath || '';
 
-var app = express();
+const app = express();
 
 // Authentication handler
-var basicAuthUser = process.env.BASIC_AUTH_USER || config.basicAuthUser;
-var basicAuthPass = process.env.BASIC_AUTH_PASS || config.basicAuthPass;
-var publicRoutes = [];
+const basicAuthUser = process.env.BASIC_AUTH_USER || config.basicAuthUser;
+const basicAuthPass = process.env.BASIC_AUTH_PASS || config.basicAuthPass;
+const publicRoutes = [];
 
-var authHandler = function (req, res, next) {
+const authHandler = function (req, res, next) {
   // Allow if basic auth is not enabled
   if (!basicAuthUser || !basicAuthPass) return next();
 
   // Allow whitelisted public routes
   if (publicRoutes.indexOf(req.path) > -1) return next();
 
-  function unauthorized (res) {
-    res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-    return res.sendStatus(401);
+  function unauthorized (response) {
+    response.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+    return response.sendStatus(401);
   }
 
   // Get basis auth credentials
-  var user = basicAuth(req);
+  const user = basicAuth(req);
   if (!user || !user.name || !user.pass) {
     return unauthorized(res);
   }
@@ -68,7 +68,7 @@ app.use(rootPath + '/missions', missionsRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  var err = new Error('Endpoint not found.');
+  const err = new Error('Endpoint not found.');
   err.status = 404;
   next(err);
 });

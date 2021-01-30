@@ -4,12 +4,12 @@
 /*  eslint no-native-reassign: "off" */
 
 $.fn.dataTable.ext.errMode = 'throw';
-var mapTable = $('#maps_table').DataTable({
-  'columns': [
+const mapTable = $('#maps_table').DataTable({
+  columns: [
     { data: 'name' },
     { data: 'steps' }
   ],
-  'order': [
+  order: [
     [0, 'desc']
   ]
 });
@@ -31,9 +31,9 @@ $('#maps_table tbody').on('dblclick', 'tr', function () {
 });
 
 $('#ok_map_table').click(function () {
-  var r = mapTable.row('.selected');
+  const r = mapTable.row('.selected');
   if (r) {
-    var d = r.data();
+    const d = r.data();
     $('#map_name').html(d.name);
     roombaMap.mapSelected(d);
   }
@@ -47,7 +47,7 @@ function loadMapList () {
   mapTable.draw();
 
   roombaMap.loadMissions(function (data) {
-    var maps = data;
+    const maps = data;
 
     maps.forEach((map) => {
       mapTable.row.add({ id: map.name, url: map.url, name: map.name, steps: map.steps });
@@ -58,8 +58,8 @@ function loadMapList () {
 }
 
 $('.action').on('click', function () {
-  var me = $(this);
-  var path = me.data('action');
+  const me = $(this);
+  const path = me.data('action');
   if (me.button) me.button('loading');
   roombaMap.doAction(path, function (data) {
     if (me.button) me.button('reset');
@@ -67,7 +67,7 @@ $('.action').on('click', function () {
   });
 });
 
-var mapChangeStatus = {
+const mapChangeStatus = {
   updateMission: function (mission) {
     $('#cycle').html(mission ? mission.cycle : '');
     $('#phase').html(mission ? mission.phase : '');
@@ -154,7 +154,7 @@ $('#menu-stop-mapping').click(function () {
   return false;
 });
 
-var roombaMap = new RoombaMap('#header', mapChangeStatus);
+const roombaMap = new RoombaMap('#header', mapChangeStatus);
 
 window.onload = function () {
   roombaMap.init();

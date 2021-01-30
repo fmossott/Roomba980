@@ -4,9 +4,9 @@
 /*  eslint no-native-reassign: "off" */
 
 // Drawer
-var drawerEl = document.querySelector('.mdc-temporary-drawer');
-var MDCTemporaryDrawer = mdc.drawer.MDCTemporaryDrawer;
-var drawer = new MDCTemporaryDrawer(drawerEl);
+const drawerEl = document.querySelector('.mdc-temporary-drawer');
+const MDCTemporaryDrawer = mdc.drawer.MDCTemporaryDrawer;
+const drawer = new MDCTemporaryDrawer(drawerEl);
 
 drawerEl.addEventListener('MDCTemporaryDrawer:open', function () {
   console.log('Received MDCTemporaryDrawer:open');
@@ -95,7 +95,7 @@ $('#menu-download').click(function () {
 
 // FAB & Toolbar icons
 
-var mainFabPath;
+let mainFabPath;
 
 $('.map-main-fab').click(function () {
   if (mainFabPath) roombaMap.doAction(mainFabPath, showResult);
@@ -112,12 +112,12 @@ $('#sec-fab-dock').click(function () {
   return false;
 });
 
-var snackbar = new mdc.snackbar.MDCSnackbar($('#map-snackbar')[0]);
+const snackbar = new mdc.snackbar.MDCSnackbar($('#map-snackbar')[0]);
 
 function showResult (res) {
   snackbar.dismissesOnAction = true;
 
-  var data = {
+  const data = {
     timeout: 1000,
     message: '???'
   };
@@ -132,11 +132,11 @@ function showResult (res) {
   snackbar.show(data);
 }
 
-var mapChangeStatus = {
+const mapChangeStatus = {
   updateMission: function (mission) {
     if (mission && mission.phase) {
-      var phase = mission.phase;
-      var cycle = mission.cycle;
+      const phase = mission.phase;
+      const cycle = mission.cycle;
 
       $('#map_icon_warning').addClass('map-hidden');
 
@@ -161,16 +161,16 @@ var mapChangeStatus = {
       }
 
       // Dock FAB if phase is not hmMidMsn, hmPostMsn, hmUsrDock, charge
-      var dockEnabled = (['charge', 'hmMidMsn', 'hmPostMsn', 'hmUsrDock'].indexOf(phase) <= -1);
+      const dockEnabled = (['charge', 'hmMidMsn', 'hmPostMsn', 'hmUsrDock'].indexOf(phase) <= -1);
       $('#sec-fab-dock').toggleClass('mdc-fab--exited', !dockEnabled);
       $('#map_icon_dock').toggleClass('map-hidden', dockEnabled);
 
       // Stop FAB is cycle is not none
-      var hasMission = (cycle !== 'none');
+      const hasMission = (cycle !== 'none');
       $('#sec-fab-stop').toggleClass('mdc-fab--exited', !hasMission);
       $('#map_icon_mission').toggleClass('map-hidden', !hasMission);
 
-      var charging = (phase === 'charge');
+      const charging = (phase === 'charge');
       $('#map_icon_battery_charging').toggleClass('map-hidden', !charging);
       $('#map_icon_battery_std').toggleClass('map-hidden', charging);
     }
@@ -200,15 +200,15 @@ var mapChangeStatus = {
 
 // Map Selection
 function loadMapList () {
-  var list = $('#map_selection_list');
+  const list = $('#map_selection_list');
   list.html('');
 
   roombaMap.loadMissions(function (data) {
-    var maps = data.sort().reverse();
+    const maps = data.sort().reverse();
 
     maps.forEach((map) => {
       if (map.name !== 'current') {
-        var li = $('<a>').attr('href', '#').addClass('mdc-list-item')
+        const li = $('<a>').attr('href', '#').addClass('mdc-list-item')
           .append($('<i>').addClass('mdc-list-item__start-detail material-icons').attr('aria-hidden', 'true').html('map'))
           .append($('<span>').addClass('mdc-list-item__text').attr('aria-hidden', 'true').html(map.name)
             .append($('<span>').addClass('mdc-list-item__text__secondary').html(map.steps + ' steps'))
@@ -226,10 +226,10 @@ function loadMapList () {
 }
 
 $('#map_selection_list').on('click', '.mdc-list-item', function () {
-  var ripple = new mdc.ripple.MDCRipple(this);
+  const ripple = new mdc.ripple.MDCRipple(this);
   ripple.activate();
 
-  var map = $(this).data('map');
+  const map = $(this).data('map');
 
   history.pushState(map, map.name);
 
@@ -244,7 +244,7 @@ function openMap (map) {
 
 // History
 
-var currentState = history.state;
+const currentState = history.state;
 
 function posState (event) {
   console.log('location: ' + document.location + ', state: ' + JSON.stringify(event.state));
@@ -260,7 +260,7 @@ function posState (event) {
   }
 }
 
-var roombaMap = new RoombaMap('#header', mapChangeStatus);
+const roombaMap = new RoombaMap('#header', mapChangeStatus);
 
 window.onpopstate = posState;
 

@@ -1,34 +1,34 @@
-var express = require('express');
+const express = require('express');
 require('express-ws')(express);
 
-var path = require('path');
-var router = express.Router();
-var fs = require('fs');
+const path = require('path');
+const router = express.Router();
+const fs = require('fs');
 
-var jsonfile = require('jsonfile');
-var statusPath = './missions/status.json';
+const jsonfile = require('jsonfile');
+const statusPath = './missions/status.json';
 
-var missionsPath = path.join(__dirname, '../missions');
+const missionsPath = path.join(__dirname, '../missions');
 
-var steps = {};
+const steps = {};
 
 function getFileInfo (filename) {
   return new Promise((resolve, reject) => {
-    var n = filename.slice(0, -4);
-    var s = steps[n];
+    let n = filename.slice(0, -4);
+    let s = steps[n];
     if (!s) {
-      var start = new Date().getTime();
+      const start = new Date().getTime();
       fs.readFile(path.join(missionsPath, filename), (err, data) => {
         if (err) {
           console.log(err);
           reject(err);
         } else {
           s = 0;
-          var lines = data.toString().split('\n');
+          const lines = data.toString().split('\n');
           lines.forEach((line) => {
             try {
               if (line.charAt(0) === '{') {
-                var obj = JSON.parse(line);
+                const obj = JSON.parse(line);
                 if (obj.pose) s++;
               }
             } catch (e) {
@@ -51,16 +51,16 @@ function getFileInfo (filename) {
 }
 
 router.get('/', function (req, res) {
-  var status = jsonfile.readFileSync(statusPath);
+  const status = jsonfile.readFileSync(statusPath);
   fs.readdir(missionsPath, (err, files) => {
     if (err) {
       console.log(err);
     } else {
-      var logFiles = files.filter((file) => {
+      const logFiles = files.filter((file) => {
         return file.endsWith('.log');
       });
 
-      var results = Promise.all(logFiles.map(getFileInfo, { req: req, status: status }));
+      const results = Promise.all(logFiles.map(getFileInfo, { req: req, status: status }));
 
       results.then(data => res.json(data));
     }
@@ -68,7 +68,7 @@ router.get('/', function (req, res) {
 });
 
 function currentLogFile (cb) {
-  var status = jsonfile.readFileSync(statusPath);
+  const status = jsonfile.readFileSync(statusPath);
   cb(path.join(missionsPath, status.missionFile));
 }
 
@@ -78,7 +78,7 @@ router.get('/current', function (req, res) {
   });
 });
 
-var myRobot;
+let myRobot;
 
 function preparews (ws) {
   console.log('WebSocket Connected');
@@ -97,7 +97,7 @@ function live (ws) {
   wsSet.add(ws);
 }
 
-var wsSet = new Set();
+const wsSet = new Set();
 
 router.ws('/status', function (ws) {
   preparews(ws);
@@ -125,16 +125,16 @@ router.ws('/loadandevents', function (ws) {
       if (err) {
         console.log(err);
       } else {
-        var lines = data.toString().split('\n');
+        const lines = data.toString().split('\n');
         try {
-          var maxX = 0;
-          var minX = 0;
-          var maxY = 0;
-          var minY = 0;
+          let maxX = 0;
+          let minX = 0;
+          let maxY = 0;
+          let minY = 0;
 
           lines.forEach((line) => {
             if (line.charAt(0) === '{') {
-              var obj = JSON.parse(line);
+              const obj = JSON.parse(line);
               if (obj.pose && obj.pose.point) {
                 maxX = Math.max(maxX, obj.pose.point.x);
                 minX = Math.min(minX, obj.pose.point.x);
@@ -157,7 +157,7 @@ router.ws('/loadandevents', function (ws) {
 });
 
 router.get('/:date', function (req, res) {
-  var logfile = path.join(missionsPath, req.params.date + '.log');
+  const logfile = path.join(missionsPath, req.params.date + '.log');
 
   res.sendFile(logfile);
 });
@@ -166,7 +166,7 @@ module.exports = (robot) => {
   myRobot = robot;
   myRobot.on('update', msg => {
     wsSet.forEach(function (ws) {
-      var obj = msg;
+      let obj = msg;
       if (ws.mapEventFilter) obj = ws.mapEventFilter(msg);
       if (obj) ws.send(JSON.stringify(obj));
     });

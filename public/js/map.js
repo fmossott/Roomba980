@@ -4,48 +4,47 @@
 /*  eslint no-native-reassign: "off" */
 
 function RoombaMap (headerSelector, changeListener) {
-  var mapChangeStatus = changeListener;
-  var header = headerSelector;
+  const mapChangeStatus = changeListener;
 
-  var xOffset;
-  var yOffset;
-  var sizeX;
-  var sizeY;
+  let xOffset;
+  let yOffset;
+  let sizeX;
+  let sizeY;
 
-  var pathLayerContext;
-  var areaLayerContext;
-  var robotBodyLayerContext;
-  var textLayerContext;
+  let pathLayerContext;
+  let areaLayerContext;
+  let robotBodyLayerContext;
+  let textLayerContext;
 
-  var pathLayer;
-  var areaLayer;
-  var robotBodyLayer;
-  var textLayer;
+  let pathLayer;
+  let areaLayer;
+  let robotBodyLayer;
+  let textLayer;
 
-  var lastPhase = '';
-  var mapping = true;
+  let lastPhase = '';
+  let mapping = true;
 
-  var zoom;
+  let zoom;
 
-  var minX;
-  var minY;
-  var maxX;
-  var maxY;
+  let minX;
+  let minY;
+  let maxX;
+  let maxY;
 
-  var lastX;
-  var lastY;
-  var lastTheta;
+  let lastX;
+  let lastY;
+  let lastTheta;
 
-  var steps = [];
-  var phases = [];
+  let steps = [];
+  let phases = [];
 
-  var replaying = false;
-  var replayStep = 0;
+  let replaying = false;
+  let replayStep = 0;
 
-  var webSocket;
+  let webSocket;
 
   function updateMinMax (x, y, autoScale) {
-    var changed = false;
+    let changed = false;
 
     if (!minX || x < minX) {
       minX = x;
@@ -107,8 +106,7 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function scale (forcePan) {
-    var changed = false;
-    var border = forcePan ? 50 : 200;
+    let changed = false;
     // autozoom
     if (zoom > Math.min(sizeX / (maxX - minX), sizeY / (maxY - minY)) || minX < -xOffset || minY < -yOffset || maxX > -xOffset + sizeX / zoom || maxY > -yOffset + sizeY / zoom) {
       zoom = Math.min(sizeX / (maxX - minX + 200), sizeY / (maxY - minY + 200), 1);
@@ -186,12 +184,12 @@ function RoombaMap (headerSelector, changeListener) {
       console.log(new Date().toISOString() + ' loading data');
       $.get(url, function (data) {
         console.log(new Date().toISOString() + ' processing data');
-        var lines = data.split('\n');
-        for (var i = 0; i < lines.length; i++) {
-          var l = lines[i];
+        const lines = data.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          const l = lines[i];
           try {
             if (l.charAt(0) === '{') {
-              var msg = JSON.parse(l);
+              const msg = JSON.parse(l);
               if (msg.pose) {
                 updateMinMax(msg.pose.point.x, msg.pose.point.y);
                 steps.push(msg.pose);
@@ -239,15 +237,15 @@ function RoombaMap (headerSelector, changeListener) {
     pathLayerContext.strokeStyle = '#000000';
     pathLayerContext.lineWidth = 1;
     pathLayerContext.lineCap = 'round';
-    
+
     areaLayerContext.lineWidth = 20;
     areaLayerContext.strokeStyle = '#808080';
     areaLayerContext.lineCap = 'round';
     areaLayerContext.lineJoin = 'round';
-    
+
     pathLayerContext.lineTo(x, y);
     areaLayerContext.lineTo(x, y);
-    
+
     if (stroke) {
       pathLayerContext.stroke();
       areaLayerContext.stroke();
@@ -255,9 +253,9 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function drawStep (pose, phase) {
-    var x = pose.point.x;
-    var y = pose.point.y;
-    var theta = pose.theta;
+    const x = pose.point.x;
+    const y = pose.point.y;
+    const theta = pose.theta;
 
     if (!replaying && (x !== lastX || y !== lastY || theta !== lastTheta)) {
       drawRobotBody(x, y, lastX, lastY, theta);
@@ -282,7 +280,7 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function calcRadio () {
-    var radio = 15;
+    let radio = 15;
     if (radio * zoom < 5) radio = 5 / zoom;
     if (radio * zoom > 30) radio = 30 / zoom;
 
@@ -294,9 +292,9 @@ function RoombaMap (headerSelector, changeListener) {
     prevX = sizeX / zoom - prevX;
 
     theta = parseInt(theta, 10);
-    var radio = calcRadio();
+    const radio = calcRadio();
 
-    var lineWidth = radio / 5;
+    const lineWidth = radio / 5;
 
     robotBodyLayerContext.clearRect(prevX - radio - 5, prevY - radio - 5, 2 * radio + 10, 2 * radio + 10);
     robotBodyLayerContext.beginPath();
@@ -307,8 +305,8 @@ function RoombaMap (headerSelector, changeListener) {
     robotBodyLayerContext.strokeStyle = '#003300';
     robotBodyLayerContext.stroke();
 
-    var outerX = x - radio * Math.cos((theta) * (Math.PI / 180));
-    var outerY = y + radio * Math.sin((theta) * (Math.PI / 180));
+    const outerX = x - radio * Math.cos((theta) * (Math.PI / 180));
+    const outerY = y + radio * Math.sin((theta) * (Math.PI / 180));
 
     robotBodyLayerContext.beginPath();
     robotBodyLayerContext.moveTo(x, y);
@@ -324,9 +322,10 @@ function RoombaMap (headerSelector, changeListener) {
   }
   function doReplay () {
     if (replayStep < steps.length) {
-      var stepsPerCycle = (replaying ? 2 : 500);
-      for (var i = 0; i < stepsPerCycle && i < steps.length - replayStep; i++) {
-        var step = steps[replayStep + i];
+      const stepsPerCycle = (replaying ? 2 : 500);
+      let i = 0;
+      for (; i < stepsPerCycle && i < steps.length - replayStep; i++) {
+        const step = steps[replayStep + i];
         drawSegment(step.point.x, step.point.y, false);
       }
       pathLayerContext.stroke();
@@ -335,7 +334,7 @@ function RoombaMap (headerSelector, changeListener) {
       setTimeout(doReplay, 0);
     } else {
       if (phases.length > 0) {
-        var p = phases[phases.length - 1];
+        const p = phases[phases.length - 1];
         drawPhase(p.x, p.y, p.phase);
       }
 
@@ -382,7 +381,7 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function getValue (name, actual) {
-    var newValue = parseInt($(name).val(), 10);
+    const newValue = parseInt($(name).val(), 10);
     if (isNaN(newValue)) {
       alert('Invalid ' + name);
       $(name).val(actual);
@@ -392,7 +391,7 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function getValueFloat (name, actual) {
-    var newValue = parseFloat($(name).val());
+    const newValue = parseFloat($(name).val());
     if (isNaN(newValue)) {
       alert('Invalid ' + name);
       $(name).val(actual);
@@ -402,11 +401,11 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function downloadCanvas () {
-    var bodyCanvas = document.getElementById('robot_body_layer');
-    var pathCanvas = document.getElementById('path_layer');
-    var areaCanvas = document.getElementById('area_layer');
+    const bodyCanvas = document.getElementById('robot_body_layer');
+    const pathCanvas = document.getElementById('path_layer');
+    const areaCanvas = document.getElementById('area_layer');
 
-    var bodyContext = bodyCanvas.getContext('2d');
+    const bodyContext = bodyCanvas.getContext('2d');
     bodyContext.drawImage(areaCanvas, 0, 0);
     bodyContext.drawImage(pathCanvas, 0, 0);
 
@@ -415,9 +414,9 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function downloadSteps () {
-    var json = JSON.stringify(steps);
-    var blob = new Blob([json], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
+    const json = JSON.stringify(steps);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     document.getElementById('downloadData').href = url;
     document.getElementById('downloadData').download = 'current_data.json';
   }
@@ -428,7 +427,7 @@ function RoombaMap (headerSelector, changeListener) {
     });
   }
 
-  var lastRecPhase;
+  let lastRecPhase;
 
   function handleEvent (msg) {
     if (msg.action === 'clear') {
@@ -440,7 +439,7 @@ function RoombaMap (headerSelector, changeListener) {
       minY = msg.minY;
       maxX = msg.maxX;
       maxY = msg.maxY;
-      var rep = replaying;
+      const rep = replaying;
       replaying = false;
       fit();
       replaying = rep;
@@ -494,10 +493,10 @@ function RoombaMap (headerSelector, changeListener) {
   }
 
   function openWs (load, statusOnly) {
-    var uri = statusOnly ? 'status' : load ? 'loadandevents' : 'events';
-    var l = window.document.location;
+    const uri = statusOnly ? 'status' : load ? 'loadandevents' : 'events';
+    const l = window.document.location;
 
-    var wsUrl = (l.protocol === 'https:' ? 'wss' : 'ws') + '://' + l.host + l.pathname + '/../missions/' + uri;
+    const wsUrl = (l.protocol === 'https:' ? 'wss' : 'ws') + '://' + l.host + l.pathname + '/../missions/' + uri;
     webSocket = new WebSocket(wsUrl);
 
     webSocket.onclose = function (event) {

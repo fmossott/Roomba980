@@ -1,6 +1,6 @@
 {
   "name": "Roomba980",
-  "version": "3.0.1",
+  "version": "3.1.1",
   "description": "MAP and REST interface to control your iRobot Roomba 9xx via local server on your lan.",
   "private": true,
   "scripts": {

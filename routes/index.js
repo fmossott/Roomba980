@@ -1,7 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var helloResponse = {
+const helloResponse = {
   documentation: 'https://github.com/fmossott/Roomba980'
 };
 

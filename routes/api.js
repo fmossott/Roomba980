@@ -1,16 +1,16 @@
 'use strict';
 
-var express = require('express');
-var router = express.Router();
-var config = require('config');
-var dorita980 = require('dorita980');
+const express = require('express');
+const router = express.Router();
+const config = require('config');
+const dorita980 = require('dorita980');
 
-var blid = process.env.BLID || config.blid;
-var password = process.env.PASSWORD || config.password;
-var firmwareVersion = parseInt((process.env.FIRMWARE_VERSION || config.firmwareVersion || 1), 10);
-var enableLocal = process.env.ENABLE_LOCAL || config.enableLocal || 'yes';
-var enableCloud = process.env.ENABLE_CLOUD || config.enableCloud || 'yes';
-var keepAlive = process.env.KEEP_ALIVE || config.keepAlive || 'yes';
+const blid = process.env.BLID || config.blid;
+const password = process.env.PASSWORD || config.password;
+const firmwareVersion = parseInt((process.env.FIRMWARE_VERSION || config.firmwareVersion || 1), 10);
+const enableLocal = process.env.ENABLE_LOCAL || config.enableLocal || 'yes';
+let enableCloud = process.env.ENABLE_CLOUD || config.enableCloud || 'yes';
+const keepAlive = process.env.KEEP_ALIVE || config.keepAlive || 'yes';
 
 // Temporal:
 if (firmwareVersion === 2) enableCloud = 'no';
@@ -19,17 +19,16 @@ if (!blid || !password) {
   throw new Error('Config not found. Please edit config/default.json file with your robot credentials. Or set BLID, PASSWORD and ROBOT_IP enviroment variables.');
 }
 
-var myRobot;
+let myRobot;
 
 router.get('/', function (req, res) {
-  res.send({
-    version: '1.0.' + firmwareVersion }
+  res.send({ version: '1.0.' + firmwareVersion }
   );
 });
 
 // LOCAL:
 
-var missingInFirmw2 = ['setTime', 'setPtime'];
+const missingInFirmw2 = ['setTime', 'setPtime'];
 
 router.get('/local/action/start', map2dorita('local', 'start'));
 router.get('/local/action/stop', map2dorita('local', 'stop'));
@@ -132,7 +131,7 @@ function map2dorita (source, method, hasArgs) {
 }
 
 function sendAndDisconnect (method, args, res, next) {
-  let client = new dorita980.Local(blid, password, myRobot.knownIP, 2);
+  const client = new dorita980.Local(blid, password, myRobot.knownIP, 2);
   client.on('connect', function () {
     client[method](args).then(function (resp) {
       res.send(resp);

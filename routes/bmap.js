@@ -1,15 +1,15 @@
-var express = require('express');
-var router = express.Router();
-var jsonfile = require('jsonfile');
-var valuesPath = './config/mapvalues.json';
+const express = require('express');
+const router = express.Router();
+const jsonfile = require('jsonfile');
+const valuesPath = './config/mapvalues.json';
 
 router.get('/', function (req, res) {
-  var mapvalues = jsonfile.readFileSync(valuesPath);
+  const mapvalues = jsonfile.readFileSync(valuesPath);
   res.render('bmap', { title: 'Roomba Map', mapvalues: mapvalues, rootPath: '.' });
 });
 
 router.post('/values', function (req, res) {
-  var mapvalues = jsonfile.readFileSync(valuesPath);
+  const mapvalues = jsonfile.readFileSync(valuesPath);
 
   mapvalues.offsetX = req.body.offsetX || mapvalues.offsetX;
   mapvalues.offsetY = req.body.offsetY || mapvalues.offsetY;
