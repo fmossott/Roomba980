@@ -1,5 +1,5 @@
 # Use latest node
-FROM node:boron
+FROM node:15.7.0-alpine3.12
 
 LABEL repository="https://github.com/fmossott/Roomba980"
 
@@ -32,7 +32,7 @@ ENV ROOT_PATH=
 
 EXPOSE ${PORT}
 
-RUN adduser --uid 2000 --gid 0 --disabled-password --gecos '' roomba
+RUN adduser --uid 2000 -G root --disabled-password --gecos '' roomba
 RUN chown -R roomba /usr/src/app/missions
 USER roomba
 
