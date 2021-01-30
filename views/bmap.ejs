@@ -1,4 +1,4 @@
-<% include header.ejs %>
+<%- include('header'); %>
 <header id="header">
   <div>
     <button type="button" class='btn btn-success action' data-action='api/local/action/start'>Start</button>
@@ -90,4 +90,4 @@
 
 <script src="<%=rootPath%>/js/bmap.js"></script>
 
-<% include footer.ejs %>
+<%- include ('footer'); %>
