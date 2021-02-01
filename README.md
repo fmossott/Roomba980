@@ -302,5 +302,17 @@ Map actions
 ![/drawer](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Drawer.png) 
 
 Map selection list
-![/maplist](https://github.com/fmossott/Roomba980/blob/master/doc/Roomba%20Map%20-%20Map%20List.png)
+![/maplist](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map%20List.png)
 
+## Open Metrics
+
+The server also provides on `http://serverIP:3000/metrics` the following metrics in OpenMetrics format.
+
+|Metric|Values|Description|
+|:---|:---|:---|
+|roomba_battery|0-100|Roomba battery charge percentage|
+|roomba_charging|0/1|Roomba battery is charging|
+|roomba_has_mission|0/1|Roomba has a mission|
+|roomba_last_mission_duration|seconds|Duration of the last completed Roomba mission in seconds|
+
+They can be imported on Prompetheus and visualized on Grafana with [this dashboard](grafgrafana/roomba_dashboard.json)
