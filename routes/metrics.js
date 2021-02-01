@@ -35,7 +35,7 @@ function onUpdate (msg) {
     const cycle = msg.cleanMissionStatus.cycle;
 
     // Check mission
-    const hasMission = (cycle !== 'none' ? 1 : 0);
+    const hasMission = (cycle !== 'none' && cycle !== 'dock' ? 1 : 0);
     hasMissionGauge.set(hasMission);
     console.log('metrics.js - set hasMissionGauge: ' + hasMission);
 
