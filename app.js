@@ -14,6 +14,7 @@ const apiRoute = require('./routes/api')(robot);
 const bmapRoute = require('./routes/bmap');
 const mmapRoute = require('./routes/mmap');
 const missionsRoute = require('./routes/missions')(robot);
+const metricsRoute = require('./routes/metrics')(robot);
 
 const rootPath = process.env.ROOT_PATH || config.rootPath || '';
 
@@ -65,6 +66,7 @@ app.use(rootPath + '/api', apiRoute);
 app.use(rootPath + '/bmap', bmapRoute);
 app.use(rootPath + '/map', mmapRoute);
 app.use(rootPath + '/missions', missionsRoute);
+app.use('/metrics', metricsRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
