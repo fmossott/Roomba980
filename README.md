@@ -298,11 +298,9 @@ Visiting  `http://serverIP:3000[/ctx]/map` to monitor your roomba activities in 
 
 ![map](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map.png)
 
-Map actions
-![drawer](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Drawer.png) 
+![map](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Drawer.png)
+![map](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map%20List.png)
 
-Map selection list
-![maplist](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map%20List.png)
 
 ## Open Metrics
 
