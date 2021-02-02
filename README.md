@@ -113,7 +113,7 @@ HTTP status 500 and response:
 
 ### Actions
 
-All cleaning actions are under `/api/local/action/[action]` endpoint using GET method  without query params:
+All cleaning actions are under `[/ctx]/api/local/action/[action]` endpoint using GET method  without query params:
 
 Available actions:
 
@@ -135,7 +135,7 @@ Success Response:
 
 ### Info
 
-All info endpoints are under `/api/local/info/[record]` using GET method without query params:
+All info endpoints are under `[/ctx]/api/local/info/[record]` using GET method without query params:
 
 Available records:
 
@@ -169,7 +169,7 @@ Success Response:
 
 ### Configurations
 
-All configuration endpoints are under `/api/local/config/[configName]` using `GET` method to get current configuration and `POST` method to set a new configuration.
+All configuration endpoints are under `[/ctx]/api/local/config/[configName]` using `GET` method to get current configuration and `POST` method to set a new configuration.
 
 Available configName:
 
@@ -294,15 +294,15 @@ You can add images or files to `public/` folder to serve static files.
 
 ## Realtime Map
 
-Visiting  `http://serverIP:3000/map` to monitor your roomba activities in real time and access to previous cleaning missions
+Visiting  `http://serverIP:3000[/ctx]/map` to monitor your roomba activities in real time and access to previous cleaning missions
 
-![/map](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map.png)
+![map](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map.png)
 
 Map actions
-![/drawer](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Drawer.png) 
+![drawer](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Drawer.png) 
 
 Map selection list
-![/maplist](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map%20List.png)
+![maplist](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Map%20-%20Map%20List.png)
 
 ## Open Metrics
 
@@ -316,3 +316,7 @@ The server also provides on `http://serverIP:3000/metrics` the following metrics
 |roomba_last_mission_duration|seconds|Duration of the last completed Roomba mission in seconds|
 
 They can be imported on Prompetheus and visualized on Grafana with [this dashboard](grafgrafana/roomba_dashboard.json)
+
+![grafana-cleaning](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Grafana%20-%20cleaning.png)
+
+![grafana-charging](https://raw.githubusercontent.com/fmossott/Roomba980/master/doc/Roomba%20Grafana%20-%20charging.png)

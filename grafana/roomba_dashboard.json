@@ -283,6 +283,7 @@
           "decimals": 0,
           "mappings": [],
           "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -299,7 +300,8 @@
                 "value": 40
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -534,7 +536,7 @@
     "list": []
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-3d",
     "to": "now"
   },
   "timepicker": {
@@ -554,5 +556,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 6
+  "version": 8
 }
