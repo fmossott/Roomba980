@@ -325,6 +325,7 @@
       "targets": [
         {
           "expr": "roomba_battery",
+          "instant": true,
           "interval": "",
           "legendFormat": "Battery %",
           "refId": "A"
@@ -553,5 +554,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 4
+  "version": 6
 }
