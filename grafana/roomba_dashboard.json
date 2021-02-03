@@ -205,13 +205,13 @@
           },
           "mappings": [
             {
-              "from": "",
+              "from": "2",
               "id": 0,
               "operator": "",
               "text": "Charging",
-              "to": "",
-              "type": 1,
-              "value": "1"
+              "to": "3",
+              "type": 2,
+              "value": "3"
             },
             {
               "from": "",
@@ -221,6 +221,15 @@
               "to": "",
               "type": 1,
               "value": "0"
+            },
+            {
+              "from": "",
+              "id": 2,
+              "operator": "",
+              "text": "Docked",
+              "to": "",
+              "type": 1,
+              "value": "1"
             }
           ],
           "thresholds": {
@@ -261,7 +270,7 @@
       "pluginVersion": "7.0.2",
       "targets": [
         {
-          "expr": "roomba_charging",
+          "expr": "roomba_charging+roomba_active_charging*2",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -271,7 +280,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Charging",
+      "title": "Docked/Charging",
       "type": "stat"
     },
     {
@@ -822,5 +831,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 16
+  "version": 18
 }
