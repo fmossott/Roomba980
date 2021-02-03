@@ -3,6 +3,9 @@ FROM node:15.7.0-alpine3.12
 
 LABEL repository="https://github.com/fmossott/Roomba980"
 
+# Create runtime user
+RUN adduser --uid 2000 -G root --disabled-password --gecos '' roomba
+
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -16,6 +19,7 @@ RUN npm install
 
 # Copy the sources
 COPY . /usr/src/app
+RUN chown -R roomba /usr/src/app/missions
 
 # Set default env
 ENV BLID=
@@ -32,11 +36,7 @@ ENV ROOT_PATH=
 
 EXPOSE ${PORT}
 
-RUN adduser --uid 2000 -G root --disabled-password --gecos '' roomba
-RUN chown -R roomba /usr/src/app/missions
 USER roomba
-
-USER 2000
 
 # Start the REST interface!
 CMD [ "npm", "start" ]
