@@ -652,10 +652,10 @@
       "hiddenSeries": false,
       "id": 11,
       "legend": {
-        "avg": false,
-        "current": false,
-        "max": true,
-        "min": true,
+        "avg": true,
+        "current": true,
+        "max": false,
+        "min": false,
         "show": true,
         "total": false,
         "values": true
@@ -680,13 +680,20 @@
           "interval": "",
           "legendFormat": "last duration",
           "refId": "A"
+        },
+        {
+          "expr": "avg_over_time(roomba_has_mission[1d])*86400",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "avg daily use",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Last Cleaning Duration",
+      "title": "Cleaning Duration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -752,5 +759,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 10
+  "version": 12
 }
