@@ -152,8 +152,14 @@
         {
           "expr": "roomba_charging",
           "interval": "",
-          "legendFormat": "Charging",
+          "legendFormat": "Docked",
           "refId": "B"
+        },
+        {
+          "expr": "roomba_active_charging",
+          "interval": "",
+          "legendFormat": "Active Charging",
+          "refId": "C"
         }
       ],
       "thresholds": [],
@@ -316,7 +322,7 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "values": false
         },
@@ -327,7 +333,7 @@
       "targets": [
         {
           "expr": "roomba_battery",
-          "instant": true,
+          "instant": false,
           "interval": "",
           "legendFormat": "Battery %",
           "refId": "A"
@@ -351,7 +357,7 @@
         "overrides": []
       },
       "fill": 1,
-      "fillGradient": 0,
+      "fillGradient": 2,
       "gridPos": {
         "h": 8,
         "w": 20,
@@ -362,12 +368,12 @@
       "id": 2,
       "legend": {
         "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
+        "current": true,
+        "max": true,
+        "min": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -379,13 +385,32 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "min",
+          "color": "#FADE2A",
+          "fill": 0,
+          "fillGradient": 0
+        },
+        {
+          "alias": "Battery %",
+          "color": "#73BF69"
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
+          "expr": "min_over_time(roomba_battery[1d])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "min",
+          "refId": "B"
+        },
+        {
           "expr": "roomba_battery",
+          "hide": false,
           "interval": "",
           "legendFormat": "Battery %",
           "refId": "A"
@@ -434,6 +459,177 @@
       }
     },
     {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 0,
+        "y": 16
+      },
+      "id": 14,
+      "options": {
+        "displayMode": "basic",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.0.2",
+      "targets": [
+        {
+          "expr": "avg_over_time(roomba_has_mission[7d])",
+          "interval": "",
+          "legendFormat": "Cleaning",
+          "refId": "A"
+        },
+        {
+          "expr": "avg_over_time(roomba_charging[7d])",
+          "interval": "",
+          "legendFormat": "Docked",
+          "refId": "B"
+        },
+        {
+          "expr": "avg_over_time(roomba_active_charging[7d])",
+          "interval": "",
+          "legendFormat": "Active Charging",
+          "refId": "C"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Average use",
+      "type": "bargauge"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 20,
+        "x": 4,
+        "y": 16
+      },
+      "hiddenSeries": false,
+      "id": 12,
+      "legend": {
+        "avg": false,
+        "current": true,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "avg_over_time(roomba_has_mission[7d])",
+          "interval": "",
+          "legendFormat": "Cleaning",
+          "refId": "A"
+        },
+        {
+          "expr": "avg_over_time(roomba_charging[7d])",
+          "interval": "",
+          "legendFormat": "Docked",
+          "refId": "B"
+        },
+        {
+          "expr": "avg_over_time(roomba_active_charging[7d])",
+          "interval": "",
+          "legendFormat": "Active Charging",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Average use",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "decimals": null,
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": "1",
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -451,7 +647,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "hiddenSeries": false,
       "id": 11,
@@ -556,5 +752,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 8
+  "version": 10
 }

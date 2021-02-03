@@ -310,6 +310,7 @@ The server also provides on `http://serverIP:3000/metrics` the following metrics
 |:---|:---|:---|
 |roomba_battery|0-100|Roomba battery charge percentage|
 |roomba_charging|0/1|Roomba battery is charging|
+|roomba_active_charging|0/1|Roomba battery is activily charging (charging and the battery is less than 100%)|
 |roomba_has_mission|0/1|Roomba has a mission|
 |roomba_last_mission_duration|seconds|Duration of the last completed Roomba mission in seconds|
 

@@ -4,13 +4,16 @@ const router = express.Router();
 const client = require('prom-client');
 const prefix = 'roomba_';
 client.collectDefaultMetrics();
-const batPctGauge = new client.Gauge({ name: prefix + 'battery', help: 'Roomba battery charge percentage 0-100' });
-const chargingGauge = new client.Gauge({ name: prefix + 'charging', help: 'Roomba battery is charging 0/1' });
-const hasMissionGauge = new client.Gauge({ name: prefix + 'has_mission', help: 'Roomba has a mission 0/1' });
+const batPctGauge = new client.Gauge({ name: prefix + 'battery', help: 'Roomba battery charge percentage: 0-100' });
+const chargingGauge = new client.Gauge({ name: prefix + 'charging', help: 'Roomba battery is charging: 0/1' });
+const activeChargingGauge = new client.Gauge({ name: prefix + 'active_charging', help: 'Roomba battery is activily charging (charging and the battery is less than 100%): 0/1' });
+const hasMissionGauge = new client.Gauge({ name: prefix + 'has_mission', help: 'Roomba has a mission: 0/1' });
 const lastMissionDurationGauge = new client.Gauge({ name: prefix + 'last_mission_duration', help: 'Duration of the last completed Roomba mission in seconds' });
 
 let prevHasMission = -1;
 let missionStart;
+let lastBatPct = 0;
+let lastCharging = 0;
 
 router.get('/', async (_req, res) => {
   try {
@@ -26,6 +29,7 @@ let myRobot;
 function onUpdate (msg) {
   console.log('metrics.js - received msg: ' + JSON.stringify(msg));
   if (msg.batPct) {
+    lastBatPct = msg.batPct;
     batPctGauge.set(msg.batPct);
     console.log('metrics.js - set batPctGauge: ' + msg.batPct);
   }
@@ -56,10 +60,14 @@ function onUpdate (msg) {
     prevHasMission = hasMission;
 
     // Check charging
-    const charging = (phase === 'charge' ? 1 : 0);
-    chargingGauge.set(charging);
-    console.log('metrics.js - set chargingGauge: ' + charging);
+    lastCharging = (phase === 'charge' ? 1 : 0);
+    chargingGauge.set(lastCharging);
+    console.log('metrics.js - set chargingGauge: ' + lastCharging);
   }
+
+  const activeCharging = (lastCharging === 1 && lastBatPct < 100) ? 1 : 0;
+  activeChargingGauge.set(activeCharging);
+  console.log('metrics.js - set activeChargingGauge: ' + activeCharging);
 }
 
 module.exports = (robot) => {
