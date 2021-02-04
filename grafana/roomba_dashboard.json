@@ -22,6 +22,9 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "decimals": 0,
           "mappings": [],
@@ -61,12 +64,14 @@
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "text": {}
       },
-      "pluginVersion": "7.0.2",
+      "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
           "expr": "roomba_battery",
@@ -89,7 +94,8 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -116,20 +122,23 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.0-beta1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [
         {
+          "$$hashKey": "object:471",
           "alias": "min",
           "color": "#FADE2A",
           "fill": 0,
           "fillGradient": 0
         },
         {
+          "$$hashKey": "object:486",
           "alias": "Battery %",
           "color": "#73BF69"
         }
@@ -138,13 +147,6 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
-        {
-          "expr": "min_over_time(roomba_battery[1d])",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "min",
-          "refId": "B"
-        },
         {
           "expr": "roomba_battery",
           "hide": false,
@@ -173,6 +175,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:159",
           "decimals": null,
           "format": "percent",
           "label": null,
@@ -182,6 +185,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:160",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -200,6 +204,9 @@
       "description": "",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null
           },
@@ -264,10 +271,13 @@
           "calcs": [
             "mean"
           ],
+          "fields": "",
           "values": false
-        }
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "pluginVersion": "7.0.2",
+      "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
           "expr": "roomba_charging+roomba_active_charging*2",
@@ -284,50 +294,84 @@
       "type": "stat"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "hideFrom": {
+              "graph": false,
+              "legend": false,
+              "tooltip": false
+            },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "from": "",
+              "id": 1,
+              "text": "N",
+              "to": "",
+              "type": 1,
+              "value": "0"
+            },
+            {
+              "from": "",
+              "id": 2,
+              "text": "Y",
+              "to": "",
+              "type": 1,
+              "value": "1"
+            }
+          ],
+          "nullValueMode": "null",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": []
       },
-      "fill": 1,
-      "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 20,
         "x": 4,
         "y": 8
       },
-      "hiddenSeries": false,
       "id": 4,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "graph": {},
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltipOptions": {
+          "mode": "single"
+        }
       },
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
           "expr": "roomba_has_mission",
@@ -344,55 +388,22 @@
         {
           "expr": "roomba_active_charging",
           "interval": "",
-          "legendFormat": "Active Charging",
+          "legendFormat": "Charging",
           "refId": "C"
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
       "title": "Cleaning / Charging",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "type": "timeseries"
     },
     {
       "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": null
           },
@@ -448,10 +459,13 @@
           "calcs": [
             "mean"
           ],
+          "fields": "",
           "values": false
-        }
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "pluginVersion": "7.0.2",
+      "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
           "expr": "roomba_has_mission",
@@ -471,6 +485,9 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "decimals": 1,
           "mappings": [],
@@ -501,11 +518,13 @@
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "showUnfilled": true
+        "showUnfilled": true,
+        "text": {}
       },
-      "pluginVersion": "7.0.2",
+      "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
           "expr": "avg_over_time(roomba_has_mission[7d])",
@@ -540,7 +559,8 @@
       "decimals": 1,
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -567,9 +587,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.0-beta1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -617,6 +638,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:323",
           "decimals": null,
           "format": "percentunit",
           "label": null,
@@ -626,6 +648,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:324",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -643,9 +666,21 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "decimals": 2,
-          "mappings": [],
+          "mappings": [
+            {
+              "from": "",
+              "id": 1,
+              "text": "",
+              "to": "",
+              "type": 1
+            }
+          ],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -655,9 +690,25 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "weekly avg daily use"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -673,29 +724,33 @@
           "calcs": [
             "lastNotNull"
           ],
+          "fields": "",
           "values": false
         },
-        "showUnfilled": true
+        "showUnfilled": false,
+        "text": {
+          "titleSize": 20
+        }
       },
-      "pluginVersion": "7.0.2",
+      "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
-          "expr": "roomba_last_mission_duration > 0",
+          "expr": "avg_over_time(roomba_has_mission[1d])*24",
           "interval": "",
-          "legendFormat": "last duration",
+          "legendFormat": "use in last 24h",
           "refId": "A"
         },
         {
-          "expr": "avg_over_time(roomba_has_mission[1d])*86400",
+          "expr": "avg_over_time(roomba_has_mission[7d])*24",
           "hide": false,
           "interval": "",
-          "legendFormat": "avg daily use",
+          "legendFormat": "weekly avg daily use",
           "refId": "B"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Cleaning Duration",
+      "title": "Cleaning Duration (h)",
       "type": "bargauge"
     },
     {
@@ -707,7 +762,8 @@
       "decimals": 2,
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "links": []
         },
         "overrides": []
       },
@@ -734,9 +790,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "7.4.0-beta1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -746,16 +803,16 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "roomba_last_mission_duration > 0",
+          "expr": "avg_over_time(roomba_has_mission[1d])*86400",
           "interval": "",
-          "legendFormat": "last duration",
+          "legendFormat": "use in last 24h",
           "refId": "A"
         },
         {
-          "expr": "avg_over_time(roomba_has_mission[1d])*86400",
+          "expr": "avg_over_time(roomba_has_mission[7d])*86400",
           "hide": false,
           "interval": "",
-          "legendFormat": "avg daily use",
+          "legendFormat": "weekly avg daily use",
           "refId": "B"
         }
       ],
@@ -779,6 +836,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:777",
           "decimals": null,
           "format": "s",
           "label": null,
@@ -788,6 +846,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:778",
           "decimals": 2,
           "format": "short",
           "label": null,
@@ -804,7 +863,7 @@
     }
   ],
   "refresh": "10s",
-  "schemaVersion": 25,
+  "schemaVersion": 27,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -831,5 +890,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 18
+  "version": 25
 }
