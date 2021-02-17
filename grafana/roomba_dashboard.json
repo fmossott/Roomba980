@@ -14,7 +14,7 @@
   },
   "editable": true,
   "gnetId": null,
-  "graphTooltip": 0,
+  "graphTooltip": 1,
   "id": 16,
   "links": [],
   "panels": [
@@ -75,7 +75,7 @@
       "targets": [
         {
           "expr": "roomba_battery",
-          "instant": false,
+          "instant": true,
           "interval": "",
           "legendFormat": "Battery %",
           "refId": "A"
@@ -294,6 +294,10 @@
       "type": "stat"
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": null,
       "fieldConfig": {
         "defaults": {
@@ -353,28 +357,43 @@
         },
         "overrides": []
       },
+      "fill": 4,
+      "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 20,
         "x": 4,
         "y": 8
       },
+      "hiddenSeries": false,
       "id": 4,
-      "options": {
-        "graph": {},
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltipOptions": {
-          "mode": "single"
-        }
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
       },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
       "pluginVersion": "7.4.0-beta1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
       "targets": [
         {
-          "expr": "roomba_has_mission",
+          "expr": "roomba_cleaning",
           "interval": "",
           "legendFormat": "Cleaning",
           "refId": "A"
@@ -392,10 +411,48 @@
           "refId": "C"
         }
       ],
+      "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Cleaning / Charging",
-      "type": "timeseries"
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:127",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:128",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "datasource": null,
@@ -468,7 +525,7 @@
       "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
-          "expr": "roomba_has_mission",
+          "expr": "roomba_cleaning",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -527,19 +584,22 @@
       "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
-          "expr": "avg_over_time(roomba_has_mission[7d])",
+          "expr": "avg_over_time(roomba_cleaning[7d])",
+          "instant": true,
           "interval": "",
           "legendFormat": "Cleaning",
           "refId": "A"
         },
         {
           "expr": "avg_over_time(roomba_charging[7d])",
+          "instant": true,
           "interval": "",
           "legendFormat": "Docked",
           "refId": "B"
         },
         {
           "expr": "avg_over_time(roomba_active_charging[7d])",
+          "instant": true,
           "interval": "",
           "legendFormat": "Active Charging",
           "refId": "C"
@@ -600,7 +660,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg_over_time(roomba_has_mission[7d])",
+          "expr": "avg_over_time(roomba_cleaning[7d])",
           "interval": "",
           "legendFormat": "Cleaning",
           "refId": "A"
@@ -735,14 +795,16 @@
       "pluginVersion": "7.4.0-beta1",
       "targets": [
         {
-          "expr": "avg_over_time(roomba_has_mission[1d])*24",
+          "expr": "avg_over_time(roomba_cleaning[1d])*24",
+          "instant": true,
           "interval": "",
           "legendFormat": "use in last 24h",
           "refId": "A"
         },
         {
-          "expr": "avg_over_time(roomba_has_mission[7d])*24",
+          "expr": "avg_over_time(roomba_cleaning[7d])*24",
           "hide": false,
+          "instant": true,
           "interval": "",
           "legendFormat": "weekly avg daily use",
           "refId": "B"
@@ -803,13 +865,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg_over_time(roomba_has_mission[1d])*86400",
+          "expr": "avg_over_time(roomba_cleaning[1d])*86400",
           "interval": "",
           "legendFormat": "use in last 24h",
           "refId": "A"
         },
         {
-          "expr": "avg_over_time(roomba_has_mission[7d])*86400",
+          "expr": "avg_over_time(roomba_cleaning[7d])*86400",
           "hide": false,
           "interval": "",
           "legendFormat": "weekly avg daily use",
@@ -890,5 +952,5 @@
   "timezone": "",
   "title": "Roomba",
   "uid": "cqTg91LGk",
-  "version": 25
+  "version": 30
 }
