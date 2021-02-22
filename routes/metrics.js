@@ -4,7 +4,7 @@ const router = express.Router();
 const client = require('prom-client');
 const prefix = 'roomba_';
 client.collectDefaultMetrics();
-const batPctGauge = new client.Gauge({ name: prefix + 'battery', help: 'Roomba battery charge percentage: 0-100' });
+let batPctGauge;
 const chargingGauge = new client.Gauge({ name: prefix + 'charging', help: 'Roomba battery is charging: 0/1' });
 const activeChargingGauge = new client.Gauge({ name: prefix + 'active_charging', help: 'Roomba battery is activily charging (charging and the battery is less than 100%): 0/1' });
 const hasMissionGauge = new client.Gauge({ name: prefix + 'has_mission', help: 'Roomba has a mission: 0/1' });
@@ -27,6 +27,9 @@ let myRobot;
 function onUpdate (msg) {
   console.log('metrics.js - received msg: ' + JSON.stringify(msg));
   if (msg.batPct) {
+    if (!batPctGauge) {
+      batPctGauge = new client.Gauge({ name: prefix + 'battery', help: 'Roomba battery charge percentage: 0-100' });
+    }
     lastBatPct = msg.batPct;
     batPctGauge.set(msg.batPct);
     console.log('metrics.js - set battery: ' + msg.batPct);
